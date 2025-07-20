@@ -1,0 +1,1558 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>番茄鐘 - 設置</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="app.js"></script>
+    <style>
+        /* 設置頁面特定樣式 */
+        .settings-section {
+            margin-bottom: 24px;
+            padding: 0 24px;
+        }
+        
+        .settings-section-title {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--gray-1);
+            margin: 16px 0 12px 0;
+            padding-left: 8px;
+        }
+        
+        .settings-list {
+            background-color: var(--light-color);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .settings-item {
+            padding: 16px;
+            border-bottom: 1px solid var(--gray-3);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background-color 0.2s;
+        }
+        
+        .settings-item:hover {
+            background-color: var(--gray-5);
+        }
+        
+        .settings-item:last-child {
+            border-bottom: none;
+        }
+        
+        .settings-item-left {
+            display: flex;
+            align-items: center;
+        }
+        
+        .settings-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: var(--radius-sm);
+            background-color: var(--gray-5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            color: var(--primary-color);
+        }
+        
+        .settings-content {
+            flex: 1;
+        }
+        
+        .settings-label {
+            font-weight: 500;
+            margin-bottom: 4px;
+            color: var(--dark-color);
+        }
+        
+        .settings-description {
+            font-size: 13px;
+            color: var(--gray-1);
+        }
+        
+        .settings-value {
+            color: var(--gray-1);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .settings-value i {
+            margin-left: 8px;
+            font-size: 16px;
+        }
+        
+        .settings-footer {
+            text-align: center;
+            padding: 24px;
+            color: var(--gray-1);
+            font-size: 13px;
+        }
+        
+        .time-picker {
+            display: flex;
+            align-items: center;
+        }
+        
+        .time-value {
+            font-weight: 500;
+            color: var(--dark-color);
+            margin-right: 6px;
+        }
+        
+        .profile-section {
+            display: flex;
+            align-items: center;
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+        
+        .profile-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+        }
+        
+        .profile-info {
+            flex: 1;
+        }
+        
+        .profile-name {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+        
+        .profile-email {
+            font-size: 14px;
+            color: var(--gray-1);
+        }
+        
+        @media (min-width: 768px) {
+            .settings-container {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 24px;
+                padding: 0 24px;
+            }
+            
+            .settings-section {
+                margin-bottom: 24px;
+                padding: 0;
+            }
+            
+            .profile-section {
+                grid-column: span 2;
+                margin-bottom: 0;
+            }
+        }
+        
+        /* 模態對話框樣式 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-container {
+            background-color: white;
+            border-radius: var(--radius-md);
+            width: 90%;
+            max-width: 400px;
+            padding: 24px;
+            box-shadow: var(--shadow-lg);
+            transform: translateY(20px);
+            transition: transform 0.3s;
+        }
+        
+        .modal-overlay.active .modal-container {
+            transform: translateY(0);
+        }
+        
+        .modal-header {
+            margin-bottom: 16px;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .modal-body {
+            margin-bottom: 24px;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+        }
+        
+        .modal-footer button {
+            margin-left: 12px;
+        }
+        
+        .time-input {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .time-input input {
+            width: 80px;
+            height: 48px;
+            font-size: 24px;
+            text-align: center;
+            border: 2px solid var(--gray-3);
+            border-radius: var(--radius-sm);
+            margin: 0 12px;
+        }
+        
+        .time-input-label {
+            font-size: 16px;
+            color: var(--gray-1);
+        }
+        
+        /* 音效選擇樣式 */
+        .sound-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .sound-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            background-color: var(--gray-5);
+            transition: background-color 0.2s;
+            cursor: pointer;
+        }
+        
+        .sound-item:hover {
+            background-color: var(--gray-4);
+        }
+        
+        .sound-item.selected {
+            background-color: rgba(66, 133, 244, 0.1);
+            border: 1px solid var(--primary-color);
+        }
+        
+        .sound-name {
+            font-weight: 500;
+        }
+        
+        .sound-preview {
+            display: flex;
+            align-items: center;
+        }
+        
+        .btn-sm {
+            padding: 6px 10px;
+            font-size: 12px;
+        }
+        
+        /* 頭像選擇樣式 */
+        .avatar-selection {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 12px;
+        }
+        
+        .avatar-option {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 2px solid transparent;
+        }
+        
+        .avatar-option:hover {
+            transform: scale(1.1);
+        }
+        
+        .avatar-option.selected {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.3);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--gray-3);
+            border-radius: var(--radius-md);
+            font-size: 16px;
+        }
+        
+        .form-input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+        
+        .form-input:disabled {
+            background-color: var(--gray-5);
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <!-- 導航欄 -->
+    <nav class="navbar">
+        <div class="container navbar-container">
+            <a href="index.html" class="navbar-brand">
+                <i class="fas fa-clock navbar-brand-icon"></i>
+                番茄鐘
+            </a>
+            <div class="flex align-center">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a href="home.html" class="nav-link">計時器</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="tasks.html" class="nav-link">任務</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="stats.html" class="nav-link">統計</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="settings.html" class="nav-link active">設置</a>
+                    </li>
+                </ul>
+            </div>
+            <div id="user-container"></div>
+        </div>
+    </nav>
+
+    <div class="container content-with-tabs">
+        <!-- 導航欄 -->
+        <div class="nav-bar">
+            <div class="nav-title">設置</div>
+            <div></div>
+        </div>
+        
+        <!-- 個人資料部分 -->
+        <div class="profile-section">
+            <div class="profile-avatar" id="user-avatar">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="profile-info">
+                <div class="profile-name" id="user-name">使用者</div>
+                <div class="profile-email" id="user-email">user@example.com</div>
+            </div>
+            <button class="nav-btn" id="edit-profile-btn">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+        
+        <div class="settings-container">
+            <!-- 計時器設置 -->
+            <div class="settings-section">
+                <div class="settings-section-title">計時器設置</div>
+                <div class="settings-list">
+                    <div class="settings-item" data-setting="focus">
+                        <div class="settings-item-left">
+                            <div class="settings-icon">
+                                <i class="fas fa-hourglass-half"></i>
+                            </div>
+                            <div class="settings-content">
+                                <div class="settings-label">專注時長</div>
+                            </div>
+                        </div>
+                        <div class="settings-value">
+                            <div class="time-picker">
+                                <div class="time-value" id="focus-time">25</div>
+                                <div>分鐘</div>
+                            </div>
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-item" data-setting="shortBreak">
+                        <div class="settings-item-left">
+                            <div class="settings-icon">
+                                <i class="fas fa-coffee"></i>
+                            </div>
+                            <div class="settings-content">
+                                <div class="settings-label">短休息時長</div>
+                            </div>
+                        </div>
+                        <div class="settings-value">
+                            <div class="time-picker">
+                                <div class="time-value" id="short-break-time">5</div>
+                                <div>分鐘</div>
+                            </div>
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-item" data-setting="longBreak">
+                        <div class="settings-item-left">
+                            <div class="settings-icon">
+                                <i class="fas fa-bed"></i>
+                            </div>
+                            <div class="settings-content">
+                                <div class="settings-label">長休息時長</div>
+                            </div>
+                        </div>
+                        <div class="settings-value">
+                            <div class="time-picker">
+                                <div class="time-value" id="long-break-time">15</div>
+                                <div>分鐘</div>
+                            </div>
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-item" data-setting="longBreakInterval">
+                        <div class="settings-item-left">
+                            <div class="settings-icon">
+                                <i class="fas fa-sync-alt"></i>
+                            </div>
+                            <div class="settings-content">
+                                <div class="settings-label">長休息間隔</div>
+                                <div class="settings-description">每完成多少個番茄鐘後進行長休息</div>
+                            </div>
+                        </div>
+                        <div class="settings-value">
+                            <div class="time-value" id="long-break-interval">4</div>
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 通知設置 -->
+            <div class="settings-section">
+                <div class="settings-section-title">通知設置</div>
+                <div class="settings-list">
+                    <div class="settings-item" data-setting="alarmSound">
+                        <div class="settings-item-left">
+                            <div class="settings-icon">
+                                <i class="fas fa-bell"></i>
+                            </div>
+                            <div class="settings-content">
+                                <div class="settings-label">提示音效</div>
+                            </div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="alarm-sound-toggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="settings-item" data-setting="alarmSoundType">
+                        <div class="settings-item-left">
+                            <div class="settings-icon">
+                                <i class="fas fa-volume-up"></i>
+                            </div>
+                            <div class="settings-content">
+                                <div class="settings-label">選擇音效</div>
+                            </div>
+                        </div>
+                        <div class="settings-value">
+                            <div id="alarm-sound-name">經典鈴聲</div>
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-item" data-setting="alarmVolume">
+                        <div class="settings-item-left">
+                            <div class="settings-icon">
+                                <i class="fas fa-volume-down"></i>
+                            </div>
+                            <div class="settings-content">
+                                <div class="settings-label">音效音量</div>
+                            </div>
+                        </div>
+                        <div class="settings-value">
+                            <input type="range" id="alarm-volume-slider" min="0" max="100" value="80" style="width: 100px;">
+                        </div>
+                    </div>
+                    
+
+                </div>
+            </div>
+            
+            <!-- 外觀設置 -->
+            <div class="settings-section">
+                <div class="settings-section-title">外觀設置</div>
+                <div class="settings-list">
+                    <div class="settings-item">
+                        <div class="settings-item-left">
+                            <div class="settings-icon">
+                                <i class="fas fa-moon"></i>
+                            </div>
+                            <div class="settings-content">
+                                <div class="settings-label">深色模式</div>
+                            </div>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="dark-mode-toggle">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    
+                    <div class="settings-item" data-setting="themeColor">
+                        <div class="settings-item-left">
+                            <div class="settings-icon">
+                                <i class="fas fa-palette"></i>
+                            </div>
+                            <div class="settings-content">
+                                <div class="settings-label">主題顏色</div>
+                            </div>
+                        </div>
+                        <div class="settings-value">
+                            <div style="width: 20px; height: 20px; background-color: var(--primary-color); border-radius: 50%;"></div>
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 其他設置 -->
+            <div class="settings-section">
+                <div class="settings-section-title">其他</div>
+                <div class="settings-list">
+                    <div class="settings-item" id="help-feedback-btn">
+                        <div class="settings-item-left">
+                            <div class="settings-icon">
+                                <i class="fas fa-question-circle"></i>
+                            </div>
+                            <div class="settings-content">
+                                <div class="settings-label">幫助與反饋</div>
+                            </div>
+                        </div>
+                        <div class="settings-value">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-item" id="about-btn">
+                        <div class="settings-item-left">
+                            <div class="settings-icon">
+                                <i class="fas fa-info-circle"></i>
+                            </div>
+                            <div class="settings-content">
+                                <div class="settings-label">關於</div>
+                            </div>
+                        </div>
+                        <div class="settings-value">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-item" id="logout-btn">
+                        <div class="settings-item-left">
+                            <div class="settings-icon" style="color: var(--error-color);">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </div>
+                            <div class="settings-content">
+                                <div class="settings-label" style="color: var(--error-color);">登出</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-item" id="delete-account-btn">
+                        <div class="settings-item-left">
+                            <div class="settings-icon" style="color: var(--error-color);">
+                                <i class="fas fa-user-slash"></i>
+                            </div>
+                            <div class="settings-content">
+                                <div class="settings-label" style="color: var(--error-color);">註銷帳號</div>
+                                <div class="settings-description">此操作不可逆，將刪除所有資料</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="settings-footer">
+            版本 1.0.0
+        </div>
+        
+        <!-- 底部標籤欄 -->
+        <div class="tab-bar">
+            <a href="home.html" class="tab-item">
+                <i class="fas fa-clock tab-icon"></i>
+                <span>計時器</span>
+            </a>
+            <a href="tasks.html" class="tab-item">
+                <i class="fas fa-tasks tab-icon"></i>
+                <span>任務</span>
+            </a>
+            <a href="stats.html" class="tab-item">
+                <i class="fas fa-chart-bar tab-icon"></i>
+                <span>統計</span>
+            </a>
+            <a href="settings.html" class="tab-item active">
+                <i class="fas fa-cog tab-icon"></i>
+                <span>設置</span>
+            </a>
+        </div>
+    </div>
+    
+    <!-- 時間設置模態對話框 -->
+    <div class="modal-overlay" id="time-setting-modal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <div class="modal-title" id="modal-title">設置時間</div>
+            </div>
+            <div class="modal-body">
+                <div class="time-input">
+                    <input type="number" id="time-input" min="1" max="60" value="25">
+                    <div class="time-input-label">分鐘</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="cancel-btn">取消</button>
+                <button class="btn btn-primary" id="save-btn">保存</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 音效選擇模態對話框 -->
+    <div class="modal-overlay" id="sound-setting-modal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <div class="modal-title">選擇音效</div>
+            </div>
+            <div class="modal-body">
+                <div class="sound-list">
+                    <div class="sound-item" data-sound="default">
+                        <div class="sound-name">經典鈴聲</div>
+                        <div class="sound-preview">
+                            <button class="btn btn-sm btn-secondary sound-preview-btn">
+                                <i class="fas fa-play"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="sound-item" data-sound="bell">
+                        <div class="sound-name">清脆鈴聲</div>
+                        <div class="sound-preview">
+                            <button class="btn btn-sm btn-secondary sound-preview-btn">
+                                <i class="fas fa-play"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="sound-item" data-sound="digital">
+                        <div class="sound-name">數字音效</div>
+                        <div class="sound-preview">
+                            <button class="btn btn-sm btn-secondary sound-preview-btn">
+                                <i class="fas fa-play"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="sound-item" data-sound="zen">
+                        <div class="sound-name">禪鐘</div>
+                        <div class="sound-preview">
+                            <button class="btn btn-sm btn-secondary sound-preview-btn">
+                                <i class="fas fa-play"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="sound-cancel-btn">取消</button>
+                <button class="btn btn-primary" id="sound-save-btn">保存</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 不再需要音效預覽元素，使用 Web Audio API 生成音效 -->
+    
+    <!-- 個人資料編輯模態對話框 -->
+    <div class="modal-overlay" id="profile-edit-modal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <div class="modal-title">編輯個人資料</div>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="profile-name" class="form-label">名稱</label>
+                    <input type="text" id="profile-name" class="form-input" placeholder="請輸入您的名稱">
+                </div>
+                <div class="form-group">
+                    <label for="profile-email" class="form-label">電子郵件</label>
+                    <input type="email" id="profile-email" class="form-input" placeholder="請輸入您的電子郵件" disabled>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">頭像</label>
+                    <div class="avatar-selection">
+                        <div class="avatar-option" data-color="#4285F4">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="avatar-option" data-color="#EA4335">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="avatar-option" data-color="#FBBC05">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="avatar-option" data-color="#34A853">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="avatar-option" data-color="#9C27B0">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="profile-cancel-btn">取消</button>
+                <button class="btn btn-primary" id="profile-save-btn">保存</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 主題顏色選擇模態對話框 -->
+    <div class="modal-overlay" id="theme-color-modal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <div class="modal-title">選擇主題顏色</div>
+            </div>
+            <div class="modal-body">
+                <div class="color-selection" style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: center;">
+                    <div class="color-option" data-color="#4285F4" style="width: 40px; height: 40px; border-radius: 50%; background-color: #4285F4; cursor: pointer; border: 2px solid transparent;"></div>
+                    <div class="color-option" data-color="#EA4335" style="width: 40px; height: 40px; border-radius: 50%; background-color: #EA4335; cursor: pointer; border: 2px solid transparent;"></div>
+                    <div class="color-option" data-color="#FBBC05" style="width: 40px; height: 40px; border-radius: 50%; background-color: #FBBC05; cursor: pointer; border: 2px solid transparent;"></div>
+                    <div class="color-option" data-color="#34A853" style="width: 40px; height: 40px; border-radius: 50%; background-color: #34A853; cursor: pointer; border: 2px solid transparent;"></div>
+                    <div class="color-option" data-color="#9C27B0" style="width: 40px; height: 40px; border-radius: 50%; background-color: #9C27B0; cursor: pointer; border: 2px solid transparent;"></div>
+                    <div class="color-option" data-color="#FF5722" style="width: 40px; height: 40px; border-radius: 50%; background-color: #FF5722; cursor: pointer; border: 2px solid transparent;"></div>
+                    <div class="color-option" data-color="#3F51B5" style="width: 40px; height: 40px; border-radius: 50%; background-color: #3F51B5; cursor: pointer; border: 2px solid transparent;"></div>
+                    <div class="color-option" data-color="#009688" style="width: 40px; height: 40px; border-radius: 50%; background-color: #009688; cursor: pointer; border: 2px solid transparent;"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="theme-cancel-btn">取消</button>
+                <button class="btn btn-primary" id="theme-save-btn">保存</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 幫助與反饋模態對話框 -->
+    <div class="modal-overlay" id="help-feedback-modal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <div class="modal-title">幫助與反饋</div>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom: 20px;">
+                    <h3 style="font-size: 16px; margin-bottom: 8px;">使用指南</h3>
+                    <p>番茄鐘是一個基於番茄工作法的時間管理工具，幫助您提高工作效率。</p>
+                    <ul style="padding-left: 20px; margin-top: 8px;">
+                        <li>設置專注時間（通常為25分鐘）</li>
+                        <li>專注工作直到計時結束</li>
+                        <li>短暫休息（通常為5分鐘）</li>
+                        <li>每完成4個番茄鐘後，進行一次較長的休息（15-30分鐘）</li>
+                    </ul>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <h3 style="font-size: 16px; margin-bottom: 8px;">常見問題</h3>
+                    <p><strong>Q: 如何創建任務？</strong><br>A: 在「任務」頁面點擊「新增任務」按鈕。</p>
+                    <p><strong>Q: 如何查看我的統計數據？</strong><br>A: 在「統計」頁面可以查看您的專注時間統計。</p>
+                    <p><strong>Q: 如何更改提示音效？</strong><br>A: 在「設置」頁面的「通知設置」中可以選擇不同的提示音效。</p>
+                </div>
+                
+                <div>
+                    <h3 style="font-size: 16px; margin-bottom: 8px;">提供反饋</h3>
+                    <p>我們非常重視您的意見和建議！請通過以下方式聯繫我們：</p>
+                    <p style="margin-top: 8px;">電子郵件：<a href="mailto:feedback@pomodoro-app.com" style="color: var(--primary-color);">feedback@pomodoro-app.com</a></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="help-close-btn">關閉</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 關於模態對話框 -->
+    <div class="modal-overlay" id="about-modal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <div class="modal-title">關於番茄鐘</div>
+            </div>
+            <div class="modal-body">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <i class="fas fa-clock" style="font-size: 48px; color: var(--primary-color); margin-bottom: 16px;"></i>
+                    <h2 style="font-size: 20px; margin-bottom: 8px;">番茄鐘</h2>
+                    <p>版本 1.0.0</p>
+                </div>
+                
+                <p style="margin-bottom: 12px;">番茄鐘是一個簡單而強大的時間管理工具，基於番茄工作法（Pomodoro Technique）設計。</p>
+                
+                <p style="margin-bottom: 12px;">番茄工作法是一種時間管理方法，使用計時器將工作分解為通常為25分鐘的小段時間，中間穿插著短暫的休息時間。這種方法旨在提高專注力和工作效率。</p>
+                
+                <p style="margin-bottom: 12px;">© 2023 番茄鐘團隊。保留所有權利。</p>
+                
+                <div style="margin-top: 20px;">
+                    <h3 style="font-size: 16px; margin-bottom: 8px;">開發團隊</h3>
+                    <ul style="padding-left: 20px;">
+                        <li>設計：UI/UX 團隊</li>
+                        <li>前端開發：Web 開發團隊</li>
+                        <li>後端開發：系統架構團隊</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" id="about-close-btn">關閉</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 檢查是否已登入
+            if (!PomodoroApp.isLoggedIn()) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // 獲取DOM元素
+            const timeSettingModal = document.getElementById('time-setting-modal');
+            const soundSettingModal = document.getElementById('sound-setting-modal');
+            const profileEditModal = document.getElementById('profile-edit-modal');
+            const deleteAccountModal = document.getElementById('delete-account-modal');
+            const themeColorModal = document.getElementById('theme-color-modal');
+            const helpFeedbackModal = document.getElementById('help-feedback-modal');
+            const aboutModal = document.getElementById('about-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const timeInput = document.getElementById('time-input');
+            const cancelBtn = document.getElementById('cancel-btn');
+            const saveBtn = document.getElementById('save-btn');
+            const soundCancelBtn = document.getElementById('sound-cancel-btn');
+            const soundSaveBtn = document.getElementById('sound-save-btn');
+            const profileCancelBtn = document.getElementById('profile-cancel-btn');
+            const profileSaveBtn = document.getElementById('profile-save-btn');
+            const deleteCancelBtn = document.getElementById('delete-cancel-btn');
+            const deleteConfirmBtn = document.getElementById('delete-confirm-btn');
+            const themeColorCancelBtn = document.getElementById('theme-cancel-btn');
+            const themeColorSaveBtn = document.getElementById('theme-save-btn');
+            const helpCloseBtn = document.getElementById('help-close-btn');
+            const aboutCloseBtn = document.getElementById('about-close-btn');
+            const confirmEmailInput = document.getElementById('confirm-email');
+            const focusTimeDisplay = document.getElementById('focus-time');
+            const shortBreakTimeDisplay = document.getElementById('short-break-time');
+            const longBreakTimeDisplay = document.getElementById('long-break-time');
+            const longBreakIntervalDisplay = document.getElementById('long-break-interval');
+            const alarmSoundToggle = document.getElementById('alarm-sound-toggle');
+            const alarmSoundName = document.getElementById('alarm-sound-name');
+            const alarmVolumeSlider = document.getElementById('alarm-volume-slider');
+            const soundItems = document.querySelectorAll('.sound-item');
+            const soundPreviewBtns = document.querySelectorAll('.sound-preview-btn');
+            const userAvatar = document.getElementById('user-avatar');
+            const userName = document.getElementById('user-name');
+            const userEmail = document.getElementById('user-email');
+            const editProfileBtn = document.getElementById('edit-profile-btn');
+            const logoutBtn = document.getElementById('logout-btn');
+            const deleteAccountBtn = document.getElementById('delete-account-btn');
+            const profileNameInput = document.getElementById('profile-name');
+            const profileEmailInput = document.getElementById('profile-email');
+            const avatarOptions = document.querySelectorAll('.avatar-option');
+            const colorOptions = document.querySelectorAll('.color-option');
+            
+            // 音效名稱映射
+            const soundNameMap = {
+                'default': '經典鈴聲',
+                'bell': '清脆鈴聲',
+                'digital': '數字音效',
+                'zen': '禪鐘',
+                'none': '無音效'
+            };
+            
+            // 當前編輯的設置項
+            let currentSetting = '';
+            let selectedSound = 'default';
+            let selectedAvatarColor = '';
+            let selectedThemeColor = '';
+            
+            // 初始化使用者資料顯示
+            function initUserProfile() {
+                const user = PomodoroApp.getCurrentUser();
+                if (user) {
+                    userName.textContent = user.name;
+                    userEmail.textContent = user.email;
+                    
+                    // 設置頭像顏色
+                    if (user.avatar) {
+                        userAvatar.style.backgroundColor = user.avatar;
+                    }
+                    
+                    // 添加使用者資訊和登出按鈕到導航欄
+                    const userContainer = document.getElementById('user-container');
+                    if (userContainer) {
+                        const userInfo = document.createElement('div');
+                        userInfo.className = 'user-info';
+                        
+                        // 使用者頭像
+                        const userAvatarNav = document.createElement('div');
+                        userAvatarNav.className = 'user-avatar';
+                        userAvatarNav.style.backgroundColor = user.avatar || '#4285F4';
+                        userAvatarNav.innerHTML = '<i class="fas fa-user"></i>';
+                        
+                        // 使用者名稱
+                        const userNameNav = document.createElement('div');
+                        userNameNav.className = 'user-name';
+                        userNameNav.textContent = user.name;
+                        
+                        // 登出按鈕
+                        const logoutBtnNav = document.createElement('button');
+                        logoutBtnNav.className = 'logout-btn';
+                        logoutBtnNav.innerHTML = '<i class="fas fa-sign-out-alt"></i>';
+                        logoutBtnNav.title = '登出';
+                        logoutBtnNav.addEventListener('click', function() {
+                            if (confirm('確定要登出嗎？')) {
+                                PomodoroApp.logout();
+                            }
+                        });
+                        
+                        userInfo.appendChild(userAvatarNav);
+                        userInfo.appendChild(userNameNav);
+                        userInfo.appendChild(logoutBtnNav);
+                        userContainer.appendChild(userInfo);
+                    }
+                }
+            }
+            
+            // 初始化設置顯示
+            function initSettings() {
+                // 從 PomodoroApp 獲取設置
+                const settings = PomodoroApp.data.timerSettings;
+                
+                // 更新顯示
+                focusTimeDisplay.textContent = Math.floor(settings.focus / 60);
+                shortBreakTimeDisplay.textContent = Math.floor(settings.shortBreak / 60);
+                longBreakTimeDisplay.textContent = Math.floor(settings.longBreak / 60);
+                longBreakIntervalDisplay.textContent = settings.longBreakInterval;
+                
+                // 音效設置
+                alarmSoundToggle.checked = settings.alarmSound !== 'none';
+                alarmSoundName.textContent = soundNameMap[settings.alarmSound] || '經典鈴聲';
+                alarmVolumeSlider.value = settings.alarmVolume * 100;
+                selectedSound = settings.alarmSound;
+ 
+                // 主題顏色設置
+                const currentThemeColor = localStorage.getItem('themeColor') || '#4285F4';
+                selectedThemeColor = currentThemeColor;
+                colorOptions.forEach(option => {
+                    if (option.dataset.color === currentThemeColor) {
+                        option.style.border = '2px solid #000';
+                    } else {
+                        option.style.border = '2px solid transparent';
+                    }
+                });
+                document.querySelector('.settings-item[data-setting="themeColor"] .settings-value div').style.backgroundColor = currentThemeColor;
+            }
+            
+            // 打開時間設置模態對話框
+            function openTimeModal(setting, title, value) {
+                currentSetting = setting;
+                modalTitle.textContent = title;
+                timeInput.value = value;
+                timeSettingModal.classList.add('active');
+            }
+            
+            // 關閉時間設置模態對話框
+            function closeTimeModal() {
+                timeSettingModal.classList.remove('active');
+            }
+            
+            // 打開音效設置模態對話框
+            function openSoundModal() {
+                // 標記當前選中的音效
+                soundItems.forEach(item => {
+                    if (item.dataset.sound === selectedSound) {
+                        item.classList.add('selected');
+                    } else {
+                        item.classList.remove('selected');
+                    }
+                });
+                
+                soundSettingModal.classList.add('active');
+            }
+            
+            // 關閉音效設置模態對話框
+            function closeSoundModal() {
+                soundSettingModal.classList.remove('active');
+            }
+            
+            // 打開個人資料編輯模態對話框
+            function openProfileEditModal() {
+                const user = PomodoroApp.getCurrentUser();
+                if (user) {
+                    profileNameInput.value = user.name;
+                    profileEmailInput.value = user.email;
+                    
+                    // 設置當前選中的頭像顏色
+                    selectedAvatarColor = user.avatar || '#4285F4';
+                    avatarOptions.forEach(option => {
+                        if (option.dataset.color === selectedAvatarColor) {
+                            option.classList.add('selected');
+                        } else {
+                            option.classList.remove('selected');
+                        }
+                    });
+                }
+                
+                profileEditModal.classList.add('active');
+            }
+            
+            // 關閉個人資料編輯模態對話框
+            function closeProfileEditModal() {
+                profileEditModal.classList.remove('active');
+            }
+            
+            // 打開主題顏色選擇模態對話框
+            function openThemeColorModal() {
+                // 從本地存儲獲取當前主題顏色
+                const currentThemeColor = localStorage.getItem('themeColor') || '#4285F4';
+                selectedThemeColor = currentThemeColor;
+                
+                // 標記當前選中的顏色
+                colorOptions.forEach(option => {
+                    if (option.dataset.color === currentThemeColor) {
+                        option.style.border = '2px solid #000';
+                    } else {
+                        option.style.border = '2px solid transparent';
+                    }
+                });
+                
+                themeColorModal.classList.add('active');
+            }
+            
+            // 關閉主題顏色選擇模態對話框
+            function closeThemeColorModal() {
+                themeColorModal.classList.remove('active');
+            }
+            
+            // 打開幫助與反饋模態對話框
+            function openHelpFeedbackModal() {
+                helpFeedbackModal.classList.add('active');
+            }
+            
+            // 關閉幫助與反饋模態對話框
+            function closeHelpFeedbackModal() {
+                helpFeedbackModal.classList.remove('active');
+            }
+            
+            // 打開關於模態對話框
+            function openAboutModal() {
+                aboutModal.classList.add('active');
+            }
+            
+            // 關閉關於模態對話框
+            function closeAboutModal() {
+                aboutModal.classList.remove('active');
+            }
+            
+            // 保存時間設置
+            function saveTimeSetting() {
+                const value = parseInt(timeInput.value);
+                if (isNaN(value) || value <= 0) {
+                    return;
+                }
+                
+                let newSettings = {};
+                
+                switch (currentSetting) {
+                    case 'focus':
+                        newSettings.focus = value * 60;
+                        focusTimeDisplay.textContent = value;
+                        break;
+                    case 'shortBreak':
+                        newSettings.shortBreak = value * 60;
+                        shortBreakTimeDisplay.textContent = value;
+                        break;
+                    case 'longBreak':
+                        newSettings.longBreak = value * 60;
+                        longBreakTimeDisplay.textContent = value;
+                        break;
+                    case 'longBreakInterval':
+                        newSettings.longBreakInterval = value;
+                        longBreakIntervalDisplay.textContent = value;
+                        break;
+                }
+                
+                // 更新 PomodoroApp 設置
+                PomodoroApp.updateSettings(newSettings);
+                
+                closeTimeModal();
+            }
+            
+            // 保存音效設置
+            function saveSoundSetting() {
+                // 更新 PomodoroApp 設置
+                PomodoroApp.updateSettings({
+                    alarmSound: selectedSound
+                });
+                
+                // 更新顯示
+                alarmSoundName.textContent = soundNameMap[selectedSound] || '經典鈴聲';
+                
+                closeSoundModal();
+            }
+            
+            // 保存個人資料設置
+            function saveProfileSetting() {
+                const name = profileNameInput.value.trim();
+                if (!name) {
+                    return;
+                }
+                
+                // 更新使用者資料
+                PomodoroApp.updateUserProfile({
+                    name: name,
+                    avatar: selectedAvatarColor
+                });
+                
+                // 更新顯示
+                userName.textContent = name;
+                userAvatar.style.backgroundColor = selectedAvatarColor;
+                
+                closeProfileEditModal();
+            }
+            
+            // 保存主題顏色設置
+            function saveThemeColorSetting() {
+                if (!selectedThemeColor) {
+                    return;
+                }
+                
+                // 保存到本地存儲
+                localStorage.setItem('themeColor', selectedThemeColor);
+                
+                // 使用 PomodoroApp 的函數來應用主題顏色
+                PomodoroApp.applyThemeColor();
+                
+                // 更新顯示
+                document.querySelector('.settings-item[data-setting="themeColor"] .settings-value div').style.backgroundColor = selectedThemeColor;
+                
+                closeThemeColorModal();
+            }
+            
+            // 設置項點擊事件
+            document.querySelectorAll('.settings-item[data-setting]').forEach(item => {
+                item.addEventListener('click', function() {
+                    const setting = this.dataset.setting;
+                    
+                    if (setting === 'alarmSoundType') {
+                        openSoundModal();
+                        return;
+                    }
+                    
+                    if (setting === 'themeColor') {
+                        openThemeColorModal();
+                        return;
+                    }
+                    
+                    let title = '';
+                    let value = 0;
+                    
+                    switch (setting) {
+                        case 'focus':
+                            title = '設置專注時長';
+                            value = parseInt(focusTimeDisplay.textContent);
+                            break;
+                        case 'shortBreak':
+                            title = '設置短休息時長';
+                            value = parseInt(shortBreakTimeDisplay.textContent);
+                            break;
+                        case 'longBreak':
+                            title = '設置長休息時長';
+                            value = parseInt(longBreakTimeDisplay.textContent);
+                            break;
+                        case 'longBreakInterval':
+                            title = '設置長休息間隔';
+                            value = parseInt(longBreakIntervalDisplay.textContent);
+                            break;
+                    }
+                    
+                    if (title) {
+                        openTimeModal(setting, title, value);
+                    }
+                });
+            });
+            
+            // 音效開關事件
+            alarmSoundToggle.addEventListener('change', function() {
+                PomodoroApp.updateSettings({
+                    alarmSound: this.checked ? (selectedSound || 'default') : 'none'
+                });
+            });
+            
+            // 音量滑塊事件
+            alarmVolumeSlider.addEventListener('input', function() {
+                const volume = parseInt(this.value) / 100;
+                PomodoroApp.updateSettings({
+                    alarmVolume: volume
+                });
+            });
+            
+            // 音效項點擊事件
+            soundItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    soundItems.forEach(i => i.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedSound = this.dataset.sound;
+                });
+            });
+            
+            // 音效預覽按鈕點擊事件
+            soundPreviewBtns.forEach((btn, index) => {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation(); // 防止觸發父元素的點擊事件
+                    const sound = soundItems[index].dataset.sound;
+                    const volume = alarmVolumeSlider.value / 100;
+                    
+                    // 使用 Web Audio API 生成音效
+                    try {
+                        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        const gainNode = audioContext.createGain();
+                        gainNode.gain.value = volume;
+                        gainNode.connect(audioContext.destination);
+                        
+                        switch (sound) {
+                            case 'bell':
+                                playBellSound(audioContext, gainNode);
+                                break;
+                            case 'digital':
+                                playDigitalSound(audioContext, gainNode);
+                                break;
+                            case 'zen':
+                                playZenSound(audioContext, gainNode);
+                                break;
+                            default:
+                                playDefaultSound(audioContext, gainNode);
+                        }
+                    } catch (err) {
+                        console.error('音效預覽失敗:', err);
+                    }
+                });
+            });
+            
+            // 默認音效（簡單的嗶嗶聲）
+            function playDefaultSound(audioContext, gainNode) {
+                const oscillator = audioContext.createOscillator();
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(880, audioContext.currentTime); // A5
+                oscillator.connect(gainNode);
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + 0.5);
+                
+                setTimeout(() => {
+                    const oscillator2 = audioContext.createOscillator();
+                    oscillator2.type = 'sine';
+                    oscillator2.frequency.setValueAtTime(1320, audioContext.currentTime); // E6
+                    oscillator2.connect(gainNode);
+                    oscillator2.start();
+                    oscillator2.stop(audioContext.currentTime + 0.5);
+                }, 600);
+            }
+            
+            // 鈴聲音效
+            function playBellSound(audioContext, gainNode) {
+                const oscillator = audioContext.createOscillator();
+                const dynamicsCompressor = audioContext.createDynamicsCompressor();
+                
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(830, audioContext.currentTime);
+                
+                // 添加衰減效果模擬鈴聲
+                const now = audioContext.currentTime;
+                gainNode.gain.setValueAtTime(0.1, now);
+                gainNode.gain.exponentialRampToValueAtTime(1, now + 0.01);
+                gainNode.gain.exponentialRampToValueAtTime(0.3, now + 0.5);
+                gainNode.gain.exponentialRampToValueAtTime(0.1, now + 1);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 1.5);
+                
+                oscillator.connect(dynamicsCompressor);
+                dynamicsCompressor.connect(gainNode);
+                
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + 1.5);
+            }
+            
+            // 數字音效
+            function playDigitalSound(audioContext, gainNode) {
+                const frequencies = [1046.5, 1318.5, 1568, 2093]; // C6, E6, G6, C7
+                
+                frequencies.forEach((freq, i) => {
+                    setTimeout(() => {
+                        const oscillator = audioContext.createOscillator();
+                        oscillator.type = 'square';
+                        oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+                        oscillator.connect(gainNode);
+                        oscillator.start();
+                        oscillator.stop(audioContext.currentTime + 0.1);
+                    }, i * 150);
+                });
+            }
+            
+            // 禪鐘音效
+            function playZenSound(audioContext, gainNode) {
+                const oscillator = audioContext.createOscillator();
+                
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(220, audioContext.currentTime); // A3
+                
+                // 添加長衰減效果
+                const now = audioContext.currentTime;
+                gainNode.gain.setValueAtTime(0.01, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.8, now + 0.1);
+                gainNode.gain.exponentialRampToValueAtTime(0.6, now + 0.6);
+                gainNode.gain.exponentialRampToValueAtTime(0.4, now + 1.2);
+                gainNode.gain.exponentialRampToValueAtTime(0.2, now + 1.8);
+                gainNode.gain.exponentialRampToValueAtTime(0.1, now + 2.4);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 3.0);
+                
+                oscillator.connect(gainNode);
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + 3.0);
+            }
+            
+            // 編輯個人資料按鈕點擊事件
+            editProfileBtn.addEventListener('click', function() {
+                openProfileEditModal();
+            });
+            
+            // 頭像選項點擊事件
+            avatarOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    avatarOptions.forEach(o => o.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedAvatarColor = this.dataset.color;
+                });
+                
+                // 設置頭像顏色
+                const color = option.dataset.color;
+                option.style.backgroundColor = color;
+            });
+            
+            // 主題顏色選項點擊事件
+            colorOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    colorOptions.forEach(o => o.style.border = '2px solid transparent');
+                    this.style.border = '2px solid #000';
+                    selectedThemeColor = this.dataset.color;
+                });
+            });
+            
+            // 登出按鈕點擊事件
+            logoutBtn.addEventListener('click', function() {
+                if (confirm('確定要登出嗎？')) {
+                    PomodoroApp.logout();
+                }
+            });
+            
+            // 打開註銷帳號模態對話框
+            function openDeleteAccountModal() {
+                confirmEmailInput.value = '';
+                deleteAccountModal.classList.add('active');
+            }
+            
+            // 關閉註銷帳號模態對話框
+            function closeDeleteAccountModal() {
+                deleteAccountModal.classList.remove('active');
+            }
+            
+            // 註銷帳號按鈕點擊事件
+            deleteAccountBtn.addEventListener('click', function() {
+                openDeleteAccountModal();
+            });
+            
+            // 註銷帳號確認按鈕點擊事件
+            deleteConfirmBtn.addEventListener('click', function() {
+                const user = PomodoroApp.getCurrentUser();
+                if (user && confirmEmailInput.value === user.email) {
+                    if (PomodoroApp.deleteAccount()) {
+                        alert('帳號已成功註銷');
+                    } else {
+                        alert('註銷帳號失敗，請稍後再試');
+                    }
+                } else {
+                    alert('電子郵件地址不正確，無法註銷帳號');
+                }
+            });
+            
+            // 取消按鈕點擊事件
+            cancelBtn.addEventListener('click', closeTimeModal);
+            soundCancelBtn.addEventListener('click', closeSoundModal);
+            profileCancelBtn.addEventListener('click', closeProfileEditModal);
+            deleteCancelBtn.addEventListener('click', closeDeleteAccountModal);
+            themeColorCancelBtn.addEventListener('click', closeThemeColorModal);
+            
+            // 保存按鈕點擊事件
+            saveBtn.addEventListener('click', saveTimeSetting);
+            soundSaveBtn.addEventListener('click', saveSoundSetting);
+            profileSaveBtn.addEventListener('click', saveProfileSetting);
+            
+            // 主題顏色保存按鈕點擊事件
+            themeColorSaveBtn.addEventListener('click', saveThemeColorSetting);
+            
+            // 幫助與反饋按鈕點擊事件
+            document.getElementById('help-feedback-btn').addEventListener('click', openHelpFeedbackModal);
+            helpCloseBtn.addEventListener('click', closeHelpFeedbackModal);
+            
+            // 關於按鈕點擊事件
+            document.getElementById('about-btn').addEventListener('click', openAboutModal);
+            aboutCloseBtn.addEventListener('click', closeAboutModal);
+            
+            // 點擊模態對話框外部關閉
+            timeSettingModal.addEventListener('click', function(e) {
+                if (e.target === timeSettingModal) {
+                    closeTimeModal();
+                }
+            });
+            
+            soundSettingModal.addEventListener('click', function(e) {
+                if (e.target === soundSettingModal) {
+                    closeSoundModal();
+                }
+            });
+            
+            profileEditModal.addEventListener('click', function(e) {
+                if (e.target === profileEditModal) {
+                    closeProfileEditModal();
+                }
+            });
+            
+            deleteAccountModal.addEventListener('click', function(e) {
+                if (e.target === deleteAccountModal) {
+                    closeDeleteAccountModal();
+                }
+            });
+            
+            themeColorModal.addEventListener('click', function(e) {
+                if (e.target === themeColorModal) {
+                    closeThemeColorModal();
+                }
+            });
+            
+            helpFeedbackModal.addEventListener('click', function(e) {
+                if (e.target === helpFeedbackModal) {
+                    closeHelpFeedbackModal();
+                }
+            });
+            
+            aboutModal.addEventListener('click', function(e) {
+                if (e.target === aboutModal) {
+                    closeAboutModal();
+                }
+            });
+            
+            // 深色模式切換
+            const darkModeToggle = document.getElementById('dark-mode-toggle');
+            
+            // 檢查本地存儲中的深色模式設置
+            const isDarkMode = localStorage.getItem('darkMode') === 'true';
+            
+            // 初始化深色模式
+            if (isDarkMode) {
+                document.body.classList.add('dark-mode');
+                darkModeToggle.checked = true;
+            }
+            
+            // 監聽深色模式切換
+            darkModeToggle.addEventListener('change', function() {
+                if (this.checked) {
+                    document.body.classList.add('dark-mode');
+                    localStorage.setItem('darkMode', 'true');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                    localStorage.setItem('darkMode', 'false');
+                }
+            });
+            
+            // 初始化設置
+            initSettings();
+            initUserProfile();
+        });
+    </script>
+    
+    <!-- 註銷帳號確認模態對話框 -->
+    <div class="modal-overlay" id="delete-account-modal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <div class="modal-title">確認註銷帳號</div>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 16px; color: var(--error-color);">
+                    <i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i>
+                    警告：此操作不可逆！
+                </p>
+                <p style="margin-bottom: 16px;">
+                    註銷帳號將永久刪除您的帳號和所有相關資料，包括：
+                </p>
+                <ul style="margin-bottom: 16px; padding-left: 20px;">
+                    <li>所有任務記錄</li>
+                    <li>所有專注時間統計</li>
+                    <li>所有個人設置</li>
+                </ul>
+                <p>
+                    請輸入您的電子郵件地址以確認註銷：
+                </p>
+                <div class="form-group">
+                    <input type="email" id="confirm-email" class="form-input" placeholder="輸入您的電子郵件">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" id="delete-cancel-btn">取消</button>
+                <button class="btn" id="delete-confirm-btn" style="background-color: var(--error-color); color: white;">確認註銷</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

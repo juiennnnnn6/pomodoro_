@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>番茄鐘 - 統計分析</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        /* 統計頁面特定樣式 */
+        .stats-header {
+            padding: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .stats-header h2 {
+            font-size: 24px;
+            font-weight: 500;
+            margin: 0;
+            color: var(--dark-color);
+        }
+        
+        .date-selector {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 24px;
+            margin-bottom: 16px;
+        }
+        
+        .date-selector-btn {
+            color: var(--gray-1);
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background-color 0.2s;
+        }
+        
+        .date-selector-btn:hover {
+            background-color: var(--gray-4);
+        }
+        
+        .date-display {
+            font-weight: 500;
+            font-size: 16px;
+        }
+        
+        .summary-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            padding: 0 24px;
+            margin-bottom: 24px;
+        }
+        
+        .summary-card {
+            background-color: var(--light-color);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .summary-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .summary-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 12px 0;
+            color: var(--primary-color);
+        }
+        
+        .summary-label {
+            font-size: 14px;
+            color: var(--gray-1);
+        }
+        
+        .chart-container {
+            margin: 24px;
+            background-color: var(--light-color);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .chart-title {
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .chart-legend {
+            display: flex;
+            gap: 16px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            font-size: 13px;
+            color: var(--gray-1);
+        }
+        
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            margin-right: 6px;
+        }
+        
+        .chart-body {
+            height: 240px;
+            position: relative;
+        }
+        
+        .bar-chart {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            height: 200px;
+        }
+        
+        .chart-bar {
+            width: 30px;
+            background-color: var(--primary-color);
+            border-radius: 4px 4px 0 0;
+        }
+        
+        .bar-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .bar-label {
+            margin-top: 12px;
+            font-size: 13px;
+            color: var(--gray-1);
+        }
+        
+        .stats-section {
+            margin: 24px;
+        }
+        
+        .stats-section-title {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            color: var(--dark-color);
+        }
+        
+        .stats-list {
+            background-color: var(--light-color);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .stats-item {
+            padding: 16px;
+            border-bottom: 1px solid var(--gray-3);
+            display: flex;
+            justify-content: space-between;
+            transition: background-color 0.2s;
+        }
+        
+        .stats-item:hover {
+            background-color: var(--gray-5);
+        }
+        
+        .stats-item:last-child {
+            border-bottom: none;
+        }
+        
+        .stats-item-title {
+            font-weight: 500;
+        }
+        
+        .stats-item-value {
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+        
+        @media (min-width: 768px) {
+            .summary-cards {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .stats-container {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 24px;
+                padding: 0 24px;
+            }
+            
+            .stats-section {
+                margin: 0 0 24px 0;
+            }
+        }
+        
+        /* 深色模式切換按鈕 */
+        .dark-mode-toggle-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--gray-5);
+            color: var(--gray-1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .dark-mode-toggle-btn:hover {
+            background-color: var(--gray-3);
+        }
+        
+        body.dark-mode .dark-mode-toggle-btn {
+            background-color: #3C4043;
+            color: #E8EAED;
+        }
+        
+        body.dark-mode .dark-mode-toggle-btn:hover {
+            background-color: #5F6368;
+        }
+        
+        /* 深色模式下的統計頁面樣式 */
+        body.dark-mode .stats-header h2,
+        body.dark-mode .stats-section-title {
+            color: #E8EAED;
+        }
+        
+        body.dark-mode .date-selector-btn {
+            color: #9AA0A6;
+        }
+        
+        body.dark-mode .date-selector-btn:hover {
+            background-color: #3C4043;
+        }
+        
+        body.dark-mode .summary-card {
+            background-color: #1e1e1e;
+            border-color: #5F6368;
+        }
+        
+        body.dark-mode .summary-label {
+            color: #9AA0A6;
+        }
+        
+        body.dark-mode .chart-container {
+            background-color: #1e1e1e;
+            border-color: #5F6368;
+        }
+        
+        body.dark-mode .chart-title {
+            color: #E8EAED;
+        }
+        
+        body.dark-mode .legend-item {
+            color: #9AA0A6;
+        }
+        
+        body.dark-mode .bar-label {
+            color: #9AA0A6;
+        }
+        
+        body.dark-mode .stats-list {
+            background-color: #1e1e1e;
+            border-color: #5F6368;
+        }
+        
+        body.dark-mode .stats-item {
+            border-bottom-color: #5F6368;
+        }
+        
+        body.dark-mode .stats-item:hover {
+            background-color: #3C4043;
+        }
+        
+        body.dark-mode .stats-item-title {
+            color: #E8EAED;
+        }
+    </style>
+</head>
+<body>
+    <!-- 導航欄 -->
+    <nav class="navbar">
+        <div class="container navbar-container">
+            <a href="index.html" class="navbar-brand">
+                <i class="fas fa-clock navbar-brand-icon"></i>
+                番茄鐘
+            </a>
+            <div class="flex align-center">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a href="home.html" class="nav-link">計時器</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="tasks.html" class="nav-link">任務</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="stats.html" class="nav-link active">統計</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="settings.html" class="nav-link">設置</a>
+                    </li>
+                </ul>
+                <button class="dark-mode-toggle-btn" id="dark-mode-toggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+            <div id="user-container"></div>
+        </div>
+    </nav>
+
+    <div class="container content-with-tabs">
+        <!-- 導航欄 -->
+        <div class="nav-bar">
+            <div class="nav-title">統計分析</div>
+            <button class="nav-btn">
+                <i class="fas fa-calendar-alt"></i>
+            </button>
+        </div>
+        
+        <!-- 日期選擇器 -->
+        <div class="date-selector">
+            <button class="date-selector-btn">
+                <i class="fas fa-chevron-left"></i>
+            </button>
+            <div class="date-display">本週</div>
+            <button class="date-selector-btn">
+                <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+        
+        <!-- 摘要卡片 -->
+        <div class="summary-cards">
+            <div class="summary-card">
+                <div class="summary-value">16</div>
+                <div class="summary-label">完成的番茄鐘</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-value">8.5</div>
+                <div class="summary-label">專注小時</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-value">75%</div>
+                <div class="summary-label">完成率</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-value">8</div>
+                <div class="summary-label">完成任務數</div>
+            </div>
+        </div>
+        
+        <!-- 每日統計圖表 -->
+        <div class="chart-container">
+            <div class="chart-header">
+                <div class="chart-title">每日番茄鐘</div>
+                <div class="chart-legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: var(--primary-color);"></div>
+                        <span>完成</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: var(--gray-3);"></div>
+                        <span>目標</span>
+                    </div>
+                </div>
+            </div>
+            <div class="chart-body">
+                <div class="bar-chart">
+                    <div class="bar-container">
+                        <div class="chart-bar" style="height: 40%; background-color: var(--primary-color);"></div>
+                        <div class="bar-label">一</div>
+                    </div>
+                    <div class="bar-container">
+                        <div class="chart-bar" style="height: 70%; background-color: var(--primary-color);"></div>
+                        <div class="bar-label">二</div>
+                    </div>
+                    <div class="bar-container">
+                        <div class="chart-bar" style="height: 55%; background-color: var(--primary-color);"></div>
+                        <div class="bar-label">三</div>
+                    </div>
+                    <div class="bar-container">
+                        <div class="chart-bar" style="height: 85%; background-color: var(--primary-color);"></div>
+                        <div class="bar-label">四</div>
+                    </div>
+                    <div class="bar-container">
+                        <div class="chart-bar" style="height: 65%; background-color: var(--primary-color);"></div>
+                        <div class="bar-label">五</div>
+                    </div>
+                    <div class="bar-container">
+                        <div class="chart-bar" style="height: 30%; background-color: var(--primary-color);"></div>
+                        <div class="bar-label">六</div>
+                    </div>
+                    <div class="bar-container">
+                        <div class="chart-bar" style="height: 20%; background-color: var(--primary-color);"></div>
+                        <div class="bar-label">日</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="stats-container">
+            <!-- 任務完成情況 -->
+            <div class="stats-section">
+                <div class="stats-section-title">任務完成情況</div>
+                <div class="stats-list">
+                    <div class="stats-item">
+                        <div class="stats-item-title">完成任務數</div>
+                        <div class="stats-item-value">8</div>
+                    </div>
+                    <div class="stats-item">
+                        <div class="stats-item-title">完成率</div>
+                        <div class="stats-item-value">75%</div>
+                    </div>
+                    <div class="stats-item">
+                        <div class="stats-item-title">平均專注時間</div>
+                        <div class="stats-item-value">1.2 小時/天</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 分類統計 -->
+            <div class="stats-section">
+                <div class="stats-section-title">分類統計</div>
+                <div class="stats-list">
+                    <div class="stats-item">
+                        <div class="stats-item-title">工作</div>
+                        <div class="stats-item-value">7 番茄鐘</div>
+                    </div>
+                    <div class="stats-item">
+                        <div class="stats-item-title">學習</div>
+                        <div class="stats-item-value">5 番茄鐘</div>
+                    </div>
+                    <div class="stats-item">
+                        <div class="stats-item-title">個人</div>
+                        <div class="stats-item-value">4 番茄鐘</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 底部標籤欄 -->
+        <div class="tab-bar">
+            <a href="home.html" class="tab-item">
+                <i class="fas fa-clock tab-icon"></i>
+                <span>計時器</span>
+            </a>
+            <a href="tasks.html" class="tab-item">
+                <i class="fas fa-tasks tab-icon"></i>
+                <span>任務</span>
+            </a>
+            <a href="stats.html" class="tab-item active">
+                <i class="fas fa-chart-bar tab-icon"></i>
+                <span>統計</span>
+            </a>
+            <a href="settings.html" class="tab-item">
+                <i class="fas fa-cog tab-icon"></i>
+                <span>設置</span>
+            </a>
+        </div>
+    </div>
+    
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 檢查是否已登入
+            if (!PomodoroApp.isLoggedIn()) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // 檢查並應用深色模式設置
+            const isDarkMode = localStorage.getItem('darkMode') === 'true';
+            if (isDarkMode) {
+                document.body.classList.add('dark-mode');
+                const icon = document.querySelector('#dark-mode-toggle i');
+                if (icon) {
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                }
+            }
+            
+            // 添加使用者資訊和登出按鈕
+            const userContainer = document.getElementById('user-container');
+            const currentUser = PomodoroApp.getCurrentUser();
+            
+            if (currentUser) {
+                userContainer.innerHTML = `
+                    <div class="user-info">
+                        <div class="user-avatar" style="background-color: ${currentUser.avatar || '#4285F4'}">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <span class="user-name">${currentUser.name}</span>
+                        <button class="logout-btn" id="logout-btn">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                `;
+                
+                document.getElementById('logout-btn').addEventListener('click', function() {
+                    PomodoroApp.logout();
+                    window.location.href = 'login.html';
+                });
+            }
+            
+            // 深色模式切換按鈕點擊事件
+            const darkModeToggle = document.getElementById('dark-mode-toggle');
+            darkModeToggle.addEventListener('click', function() {
+                document.body.classList.toggle('dark-mode');
+                const isDark = document.body.classList.contains('dark-mode');
+                localStorage.setItem('darkMode', isDark);
+                
+                const icon = darkModeToggle.querySelector('i');
+                if (isDark) {
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                } else {
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                }
+            });
+            
+            // 模擬數據
+            function renderCharts() {
+                // 這裡可以添加實際的圖表渲染代碼
+                console.log('渲染圖表數據');
+            }
+            
+            renderCharts();
+        });
+    </script>
+</body>
+</html>
