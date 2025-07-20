@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>番茄鐘 - 任務管理</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="app.js"></script>
+    <style>
+        .tasks-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        
+        .tasks-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .tasks-title {
+            font-size: 24px;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+        
+        .tasks-filter {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        
+        .filter-item {
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            color: var(--gray-1);
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .filter-item:hover {
+            background-color: var(--gray-5);
+        }
+        
+        .filter-item.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .task-list {
+            margin-bottom: 30px;
+        }
+        
+        .task-item {
+            background-color: var(--light-color);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid var(--gray-3);
+            display: flex;
+            align-items: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .task-item:hover {
+            box-shadow: var(--shadow-md);
+        }
+        
+        .task-checkbox {
+            margin-right: 16px;
+            position: relative;
+        }
+        
+        .task-checkbox input {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+        
+        .checkmark {
+            position: relative;
+            display: block;
+            height: 20px;
+            width: 20px;
+            border-radius: 4px;
+            border: 2px solid var(--gray-3);
+            transition: all 0.2s;
+        }
+        
+        .task-checkbox input:checked ~ .checkmark {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .checkmark:after {
+            content: "";
+            position: absolute;
+            display: none;
+            left: 6px;
+            top: 2px;
+            width: 5px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+        
+        .task-checkbox input:checked ~ .checkmark:after {
+            display: block;
+        }
+        
+        .task-content {
+            flex: 1;
+        }
+        
+        .task-name {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--dark-color);
+            margin-bottom: 6px;
+        }
+        
+        .task-item.completed .task-name {
+            text-decoration: line-through;
+            color: var(--gray-2);
+        }
+        
+        .task-meta {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            font-size: 14px;
+            color: var(--gray-1);
+        }
+        
+        .task-meta-item {
+            display: flex;
+            align-items: center;
+        }
+        
+        .task-meta-item i {
+            margin-right: 6px;
+            font-size: 12px;
+        }
+        
+        .task-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .task-action-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--gray-5);
+            color: var(--gray-1);
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .task-action-btn:hover {
+            background-color: var(--gray-4);
+            color: var(--dark-color);
+        }
+        
+        .task-category-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            background-color: var(--gray-5);
+        }
+        
+        .task-category-badge.work {
+            background-color: rgba(66, 133, 244, 0.1);
+            color: var(--primary-color);
+        }
+        
+        .task-category-badge.study {
+            background-color: rgba(52, 168, 83, 0.1);
+            color: var(--secondary-color);
+        }
+        
+        .task-category-badge.personal {
+            background-color: rgba(251, 188, 5, 0.1);
+            color: var(--warning-color);
+        }
+        
+        /* 深色模式切換按鈕 */
+        .dark-mode-toggle-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--gray-5);
+            color: var(--gray-1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .dark-mode-toggle-btn:hover {
+            background-color: var(--gray-3);
+        }
+        
+        body.dark-mode .dark-mode-toggle-btn {
+            background-color: #3C4043;
+            color: #E8EAED;
+        }
+        
+        body.dark-mode .dark-mode-toggle-btn:hover {
+            background-color: #5F6368;
+        }
+        
+        /* 深色模式下的任務項樣式 */
+        body.dark-mode .task-item {
+            background-color: #1e1e1e;
+            border-color: #5F6368;
+        }
+        
+        body.dark-mode .task-name {
+            color: #E8EAED;
+        }
+        
+        body.dark-mode .task-meta {
+            color: #9AA0A6;
+        }
+        
+        body.dark-mode .task-action-btn {
+            background-color: #3C4043;
+            color: #9AA0A6;
+        }
+        
+        body.dark-mode .task-action-btn:hover {
+            background-color: #5F6368;
+            color: #E8EAED;
+        }
+        
+        body.dark-mode .checkmark {
+            border-color: #5F6368;
+        }
+        
+        body.dark-mode .filter-item {
+            color: #9AA0A6;
+        }
+        
+        body.dark-mode .filter-item:hover {
+            background-color: #3C4043;
+        }
+        
+        body.dark-mode .filter-item.active {
+            background-color: var(--primary-color);
+            color: #E8EAED;
+        }
+        
+        body.dark-mode .tasks-title {
+            color: #E8EAED;
+        }
+        
+        .add-task-btn {
+            position: fixed;
+            bottom: 90px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s, transform 0.2s;
+            z-index: 99;
+        }
+        
+        .add-task-btn:hover {
+            background-color: var(--primary-dark);
+            transform: scale(1.05);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.show {
+            display: flex;
+        }
+        
+        .modal-content {
+            background-color: var(--light-color);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-lg);
+            width: 100%;
+            max-width: 500px;
+            padding: 24px;
+            position: relative;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: var(--gray-2);
+            cursor: pointer;
+        }
+        
+        .modal-body {
+            margin-bottom: 24px;
+        }
+        
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 0;
+            color: var(--gray-2);
+        }
+        
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            color: var(--gray-3);
+        }
+        
+        .empty-state-title {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--gray-1);
+        }
+        
+        .empty-state-text {
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 導航欄 -->
+    <nav class="navbar">
+        <div class="container navbar-container">
+            <a href="index.html" class="navbar-brand">
+                <i class="fas fa-clock navbar-brand-icon"></i>
+                番茄鐘
+            </a>
+            <div class="flex align-center">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a href="home.html" class="nav-link">計時器</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="tasks.html" class="nav-link active">任務</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="stats.html" class="nav-link">統計</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="settings.html" class="nav-link">設置</a>
+                    </li>
+                </ul>
+                <button class="dark-mode-toggle-btn" id="dark-mode-toggle">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
+            <div id="user-container"></div>
+        </div>
+    </nav>
+
+    <div class="container content-with-tabs">
+        <div class="tasks-container">
+            <div class="tasks-header">
+                <h1 class="tasks-title">任務管理</h1>
+            </div>
+            
+            <div class="tasks-filter">
+                <div class="filter-item active" data-filter="all">全部</div>
+                <div class="filter-item" data-filter="today">今天</div>
+                <div class="filter-item" data-filter="important">重要</div>
+                <div class="filter-item" data-filter="completed">已完成</div>
+            </div>
+            
+            <div class="task-list" id="task-list">
+                <!-- 任務列表將通過 JavaScript 動態生成 -->
+            </div>
+            
+            <button class="add-task-btn" id="add-task-btn">
+                <i class="fas fa-plus"></i>
+            </button>
+        </div>
+        
+        <!-- 底部標籤欄 -->
+        <div class="tab-bar">
+            <a href="home.html" class="tab-item">
+                <i class="fas fa-clock tab-icon"></i>
+                <span>計時器</span>
+            </a>
+            <a href="tasks.html" class="tab-item active">
+                <i class="fas fa-tasks tab-icon"></i>
+                <span>任務</span>
+            </a>
+            <a href="stats.html" class="tab-item">
+                <i class="fas fa-chart-bar tab-icon"></i>
+                <span>統計</span>
+            </a>
+            <a href="settings.html" class="tab-item">
+                <i class="fas fa-cog tab-icon"></i>
+                <span>設置</span>
+            </a>
+        </div>
+    </div>
+    
+    <!-- 添加/編輯任務模態框 -->
+    <div class="modal" id="task-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modal-title">添加任務</h2>
+                <button class="modal-close" id="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="task-form">
+                    <div class="form-group">
+                        <label for="task-name" class="form-label">任務名稱</label>
+                        <input type="text" id="task-name" class="form-input" placeholder="輸入任務名稱" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="task-category" class="form-label">類別</label>
+                        <select id="task-category" class="form-input">
+                            <option value="work">工作</option>
+                            <option value="study">學習</option>
+                            <option value="personal">個人</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="task-pomodoros" class="form-label">預計番茄鐘數</label>
+                        <input type="number" id="task-pomodoros" class="form-input" min="1" max="10" value="1">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="task-date" class="form-label">日期</label>
+                        <input type="date" id="task-date" class="form-input">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="task-priority" class="form-label">優先級</label>
+                        <select id="task-priority" class="form-input">
+                            <option value="normal">普通</option>
+                            <option value="important">重要</option>
+                        </select>
+                    </div>
+                    
+                    <input type="hidden" id="task-id">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancel-btn">取消</button>
+                <button class="btn btn-primary" id="save-task-btn">保存</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 頁腳 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-links">
+                <a href="#" class="footer-link">關於我們</a>
+                <a href="#" class="footer-link">隱私政策</a>
+                <a href="#" class="footer-link">使用條款</a>
+                <a href="#" class="footer-link">聯繫我們</a>
+            </div>
+            <div class="footer-copyright">
+                &copy; 2023 番茄鐘 - 提升您的工作效率
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 檢查是否已登入
+            if (!PomodoroApp.isLoggedIn()) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // 檢查並應用深色模式設置
+            const isDarkMode = localStorage.getItem('darkMode') === 'true';
+            if (isDarkMode) {
+                document.body.classList.add('dark-mode');
+                const icon = document.querySelector('#dark-mode-toggle i');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+            
+            // 添加使用者資訊和登出按鈕
+            const userContainer = document.getElementById('user-container');
+            const currentUser = PomodoroApp.getCurrentUser();
+            
+            if (currentUser) {
+                const userInfo = document.createElement('div');
+                userInfo.className = 'user-info';
+                
+                // 使用者頭像
+                const userAvatar = document.createElement('div');
+                userAvatar.className = 'user-avatar';
+                userAvatar.style.backgroundColor = currentUser.avatar || '#4285F4';
+                userAvatar.innerHTML = '<i class="fas fa-user"></i>';
+                
+                // 使用者名稱
+                const userName = document.createElement('div');
+                userName.className = 'user-name';
+                userName.textContent = currentUser.name;
+                
+                // 登出按鈕
+                const logoutBtn = document.createElement('button');
+                logoutBtn.className = 'logout-btn ml-2';
+                logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i>';
+                logoutBtn.title = '登出';
+                logoutBtn.addEventListener('click', function() {
+                    if (confirm('確定要登出嗎？')) {
+                        PomodoroApp.logout();
+                    }
+                });
+                
+                userInfo.appendChild(userAvatar);
+                userInfo.appendChild(userName);
+                userInfo.appendChild(logoutBtn);
+                userContainer.appendChild(userInfo);
+            }
+            
+            // 獲取元素
+            const taskList = document.getElementById('task-list');
+            const addTaskBtn = document.getElementById('add-task-btn');
+            const taskModal = document.getElementById('task-modal');
+            const modalTitle = document.getElementById('modal-title');
+            const modalClose = document.getElementById('modal-close');
+            const cancelBtn = document.getElementById('cancel-btn');
+            const saveTaskBtn = document.getElementById('save-task-btn');
+            const taskForm = document.getElementById('task-form');
+            const taskNameInput = document.getElementById('task-name');
+            const taskCategorySelect = document.getElementById('task-category');
+            const taskPomodorosInput = document.getElementById('task-pomodoros');
+            const taskDateInput = document.getElementById('task-date');
+            const taskPrioritySelect = document.getElementById('task-priority');
+            const taskIdInput = document.getElementById('task-id');
+            const filterItems = document.querySelectorAll('.filter-item');
+            const darkModeToggleBtn = document.getElementById('dark-mode-toggle');
+            
+            let currentFilter = 'all';
+            
+            // 設置今天的日期為默認值
+            taskDateInput.valueAsDate = new Date();
+            
+            // 初始化任務列表
+            function initTaskList() {
+                // 獲取任務列表
+                let tasks = [];
+                
+                switch (currentFilter) {
+                    case 'all':
+                        tasks = PomodoroApp.getTasks();
+                        break;
+                    case 'today':
+                        tasks = PomodoroApp.getTasks({ category: 'today' });
+                        break;
+                    case 'important':
+                        tasks = PomodoroApp.getTasks({ category: 'important' });
+                        break;
+                    case 'completed':
+                        tasks = PomodoroApp.getTasks({ completed: true });
+                        break;
+                }
+                
+                // 清空任務列表
+                taskList.innerHTML = '';
+                
+                // 如果沒有任務，顯示空狀態
+                if (tasks.length === 0) {
+                    const emptyState = document.createElement('div');
+                    emptyState.className = 'empty-state';
+                    emptyState.innerHTML = `
+                        <i class="fas fa-tasks"></i>
+                        <h3 class="empty-state-title">暫無任務</h3>
+                        <p class="empty-state-text">點擊下方按鈕添加新任務</p>
+                        <button class="btn btn-primary" id="empty-add-btn">
+                            <i class="fas fa-plus mr-1"></i> 添加任務
+                        </button>
+                    `;
+                    taskList.appendChild(emptyState);
+                    
+                    // 添加事件監聽器
+                    document.getElementById('empty-add-btn').addEventListener('click', openAddTaskModal);
+                    return;
+                }
+                
+                // 添加任務項
+                tasks.forEach(task => {
+                    const taskItem = document.createElement('div');
+                    taskItem.className = `task-item ${task.completed ? 'completed' : ''}`;
+                    taskItem.dataset.id = task.id;
+                    
+                    // 格式化日期
+                    const taskDate = task.date ? new Date(task.date) : new Date();
+                    const formattedDate = `${taskDate.getMonth() + 1}/${taskDate.getDate()}`;
+                    
+                    // 類別顯示名稱
+                    const categoryNames = {
+                        'work': '工作',
+                        'study': '學習',
+                        'personal': '個人'
+                    };
+                    
+                    taskItem.innerHTML = `
+                        <label class="task-checkbox">
+                            <input type="checkbox" ${task.completed ? 'checked' : ''}>
+                            <span class="checkmark"></span>
+                        </label>
+                        <div class="task-content">
+                            <div class="task-name">${task.name}</div>
+                            <div class="task-meta">
+                                <div class="task-meta-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>${task.completedPomodoros}/${task.pomodoros}</span>
+                                </div>
+                                <div class="task-meta-item">
+                                    <i class="fas fa-calendar"></i>
+                                    <span>${formattedDate}</span>
+                                </div>
+                                <div class="task-category-badge ${task.category}">
+                                    ${categoryNames[task.category] || task.category}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="task-actions">
+                            <button class="task-action-btn edit-btn" title="編輯">
+                                <i class="fas fa-pencil-alt"></i>
+                            </button>
+                            <button class="task-action-btn delete-btn" title="刪除">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                    
+                    taskList.appendChild(taskItem);
+                    
+                    // 添加事件監聽器
+                    const checkbox = taskItem.querySelector('input[type="checkbox"]');
+                    const editBtn = taskItem.querySelector('.edit-btn');
+                    const deleteBtn = taskItem.querySelector('.delete-btn');
+                    
+                    checkbox.addEventListener('change', function() {
+                        toggleTaskCompletion(task.id, this.checked);
+                    });
+                    
+                    editBtn.addEventListener('click', function() {
+                        openEditTaskModal(task.id);
+                    });
+                    
+                    deleteBtn.addEventListener('click', function() {
+                        deleteTask(task.id);
+                    });
+                });
+            }
+            
+            // 切換任務完成狀態
+            function toggleTaskCompletion(taskId, completed) {
+                const task = PomodoroApp.data.tasks.find(t => t.id === taskId);
+                if (task) {
+                    task.completed = completed;
+                    
+                    // 如果標記為完成，則設置已完成番茄鐘數等於總番茄鐘數
+                    if (completed) {
+                        task.completedPomodoros = task.pomodoros;
+                    }
+                    
+                    // 觸發任務更新事件
+                    const event = new CustomEvent('taskUpdated', {
+                        detail: {
+                            type: 'update',
+                            task: task
+                        }
+                    });
+                    document.dispatchEvent(event);
+                    
+                    // 重新初始化任務列表
+                    initTaskList();
+                }
+            }
+            
+            // 打開添加任務模態框
+            function openAddTaskModal() {
+                // 重置表單
+                taskForm.reset();
+                taskIdInput.value = '';
+                taskDateInput.valueAsDate = new Date();
+                
+                // 設置模態框標題
+                modalTitle.textContent = '添加任務';
+                
+                // 顯示模態框
+                taskModal.classList.add('show');
+            }
+            
+            // 打開編輯任務模態框
+            function openEditTaskModal(taskId) {
+                const task = PomodoroApp.data.tasks.find(t => t.id === taskId);
+                if (task) {
+                    // 填充表單
+                    taskNameInput.value = task.name;
+                    taskCategorySelect.value = task.category;
+                    taskPomodorosInput.value = task.pomodoros;
+                    taskDateInput.value = task.date || '';
+                    taskPrioritySelect.value = task.priority || 'normal';
+                    taskIdInput.value = task.id;
+                    
+                    // 設置模態框標題
+                    modalTitle.textContent = '編輯任務';
+                    
+                    // 顯示模態框
+                    taskModal.classList.add('show');
+                }
+            }
+            
+            // 關閉模態框
+            function closeModal() {
+                taskModal.classList.remove('show');
+            }
+            
+            // 保存任務
+            function saveTask() {
+                // 獲取表單數據
+                const name = taskNameInput.value.trim();
+                const category = taskCategorySelect.value;
+                const pomodoros = parseInt(taskPomodorosInput.value);
+                const date = taskDateInput.value;
+                const priority = taskPrioritySelect.value;
+                const taskId = taskIdInput.value;
+                
+                if (!name) {
+                    alert('請輸入任務名稱');
+                    return;
+                }
+                
+                if (isNaN(pomodoros) || pomodoros < 1) {
+                    alert('請輸入有效的番茄鐘數');
+                    return;
+                }
+                
+                // 創建任務對象
+                const task = {
+                    name: name,
+                    category: category,
+                    pomodoros: pomodoros,
+                    completedPomodoros: 0,
+                    date: date,
+                    priority: priority,
+                    completed: false
+                };
+                
+                // 如果是編輯任務
+                if (taskId) {
+                    task.id = taskId;
+                    
+                    // 保留已完成的番茄鐘數
+                    const existingTask = PomodoroApp.data.tasks.find(t => t.id === taskId);
+                    if (existingTask) {
+                        task.completedPomodoros = existingTask.completedPomodoros;
+                        task.completed = existingTask.completed;
+                    }
+                    
+                    // 觸發任務更新事件
+                    const event = new CustomEvent('taskUpdated', {
+                        detail: {
+                            type: 'update',
+                            task: task
+                        }
+                    });
+                    document.dispatchEvent(event);
+                } else {
+                    // 生成唯一ID
+                    task.id = 'task_' + Date.now();
+                    
+                    // 觸發任務添加事件
+                    const event = new CustomEvent('taskUpdated', {
+                        detail: {
+                            type: 'add',
+                            task: task
+                        }
+                    });
+                    document.dispatchEvent(event);
+                }
+                
+                // 關閉模態框
+                closeModal();
+                
+                // 重新初始化任務列表
+                initTaskList();
+            }
+            
+            // 刪除任務
+            function deleteTask(taskId) {
+                if (confirm('確定要刪除此任務嗎？')) {
+                    // 觸發任務刪除事件
+                    const event = new CustomEvent('taskUpdated', {
+                        detail: {
+                            type: 'delete',
+                            taskId: taskId
+                        }
+                    });
+                    document.dispatchEvent(event);
+                    
+                    // 重新初始化任務列表
+                    initTaskList();
+                }
+            }
+            
+            // 深色模式切換
+            function toggleDarkMode() {
+                document.body.classList.toggle('dark-mode');
+                const isDark = document.body.classList.contains('dark-mode');
+                localStorage.setItem('darkMode', isDark);
+                
+                const icon = darkModeToggleBtn.querySelector('i');
+                if (isDark) {
+                    icon.classList.remove('fa-moon');
+                    icon.classList.add('fa-sun');
+                    darkModeToggleBtn.title = '切換至淺色模式';
+                } else {
+                    icon.classList.remove('fa-sun');
+                    icon.classList.add('fa-moon');
+                    darkModeToggleBtn.title = '切換至深色模式';
+                }
+            }
+            
+            // 事件監聽器
+            addTaskBtn.addEventListener('click', openAddTaskModal);
+            modalClose.addEventListener('click', closeModal);
+            cancelBtn.addEventListener('click', closeModal);
+            saveTaskBtn.addEventListener('click', saveTask);
+            darkModeToggleBtn.addEventListener('click', toggleDarkMode);
+            
+            // 過濾器點擊事件
+            filterItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    // 移除所有過濾器的活動狀態
+                    filterItems.forEach(i => i.classList.remove('active'));
+                    
+                    // 添加當前過濾器的活動狀態
+                    this.classList.add('active');
+                    
+                    // 設置當前過濾器
+                    currentFilter = this.dataset.filter;
+                    
+                    // 重新初始化任務列表
+                    initTaskList();
+                });
+            });
+            
+            // 初始化任務列表
+            initTaskList();
+        });
+    </script>
+</body>
+</html> 

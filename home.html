@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>番茄鐘</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="app.js"></script>
+    <style>
+        .timer-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            text-align: center;
+        }
+        
+        .timer-modes {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            border-radius: var(--radius-md);
+            background-color: var(--gray-5);
+            padding: 6px;
+            max-width: 360px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .timer-mode {
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            color: var(--gray-1);
+            flex: 1;
+        }
+        
+        .timer-mode.active {
+            background-color: var(--light-color);
+            color: var(--primary-color);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .timer-circle {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 0 auto 30px;
+        }
+        
+        .timer-progress {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .timer-progress svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+        
+        .timer-progress circle {
+            fill: none;
+            stroke-width: 8;
+            stroke-linecap: round;
+            stroke: var(--gray-4);
+        }
+        
+        .timer-progress circle.progress {
+            stroke: var(--primary-color);
+            stroke-dasharray: 880;
+            stroke-dashoffset: 880;
+            transition: stroke-dashoffset 1s linear;
+        }
+        
+        .timer-display {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .timer-time {
+            font-size: 64px;
+            font-weight: 300;
+            color: var(--dark-color);
+            font-variant-numeric: tabular-nums;
+        }
+        
+        .timer-label {
+            font-size: 16px;
+            color: var(--gray-1);
+            margin-top: 8px;
+        }
+        
+        .timer-controls {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            gap: 16px;
+        }
+        
+        .timer-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            background-color: var(--primary-color);
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .timer-btn:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .timer-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .timer-btn.secondary {
+            background-color: var(--gray-5);
+            color: var(--gray-1);
+            width: 48px;
+            height: 48px;
+            font-size: 18px;
+        }
+        
+        .timer-btn.secondary:hover {
+            background-color: var(--gray-4);
+        }
+        
+        .pomodoro-count {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            gap: 8px;
+        }
+        
+        .pomodoro-item {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--gray-4);
+        }
+        
+        .pomodoro-item.completed {
+            background-color: var(--primary-color);
+        }
+        
+        .task-section {
+            background-color: var(--light-color);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 1px solid var(--gray-3);
+            text-align: left;
+        }
+        
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .task-title {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--dark-color);
+        }
+        
+        .task-select {
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--gray-3);
+            background-color: var(--light-color);
+            font-size: 14px;
+            color: var(--gray-1);
+            width: 100%;
+            cursor: pointer;
+        }
+        
+        .task-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        
+        .task-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: var(--gray-1);
+            margin-top: 12px;
+        }
+        
+        .task-pomodoros {
+            display: flex;
+            align-items: center;
+        }
+        
+        .task-pomodoros i {
+            color: var(--primary-color);
+            margin-right: 6px;
+        }
+        
+        .task-category {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            background-color: var(--gray-5);
+        }
+        
+        .task-category.work {
+            background-color: rgba(66, 133, 244, 0.1);
+            color: var(--primary-color);
+        }
+        
+        .task-category.study {
+            background-color: rgba(52, 168, 83, 0.1);
+            color: var(--secondary-color);
+        }
+        
+        .settings-link {
+            display: inline-flex;
+            align-items: center;
+            color: var(--gray-1);
+            font-size: 14px;
+            margin-top: 20px;
+            text-decoration: none;
+        }
+        
+        .settings-link:hover {
+            color: var(--primary-color);
+        }
+        
+        .settings-link i {
+            margin-right: 6px;
+        }
+        
+        /* 深色模式切換按鈕 */
+        .dark-mode-toggle-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--gray-5);
+            color: var(--gray-1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .dark-mode-toggle-btn:hover {
+            background-color: var(--gray-3);
+        }
+        
+        body.dark-mode .dark-mode-toggle-btn {
+            background-color: #3C4043;
+            color: #E8EAED;
+        }
+        
+        body.dark-mode .dark-mode-toggle-btn:hover {
+            background-color: #5F6368;
+        }
+    </style>
+</head>
+<body>
+    <!-- 導航欄 -->
+    <nav class="navbar">
+        <div class="container navbar-container">
+            <a href="index.html" class="navbar-brand">
+                <i class="fas fa-clock navbar-brand-icon"></i>
+                番茄鐘
+            </a>
+            <div class="flex align-center">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a href="home.html" class="nav-link active">計時器</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="tasks.html" class="nav-link">任務</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="stats.html" class="nav-link">統計</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="settings.html" class="nav-link">設置</a>
+                    </li>
+                </ul>
+                <div class="dark-mode-toggle-btn" id="darkModeToggle">
+                    <i class="fas fa-moon"></i>
+                </div>
+            </div>
+            <div id="user-container"></div>
+        </div>
+    </nav>
+
+    <div class="container content-with-tabs">
+        <div class="timer-container">
+            <div class="timer-modes">
+                <div class="timer-mode active" id="mode-focus">專注</div>
+                <div class="timer-mode" id="mode-short-break">短休息</div>
+                <div class="timer-mode" id="mode-long-break">長休息</div>
+            </div>
+            
+            <div class="timer-circle">
+                <div class="timer-progress">
+                    <svg viewBox="0 0 300 300">
+                        <circle cx="150" cy="150" r="140"></circle>
+                        <circle class="progress" cx="150" cy="150" r="140" id="progress-ring"></circle>
+                    </svg>
+                </div>
+                <div class="timer-display">
+                    <div class="timer-time" id="timer-time">25:00</div>
+                    <div class="timer-label" id="timer-label">專注時間</div>
+                </div>
+            </div>
+            
+            <div class="timer-controls">
+                <button class="timer-btn secondary" id="btn-skip">
+                    <i class="fas fa-forward"></i>
+                </button>
+                <button class="timer-btn" id="btn-start">
+                    <i class="fas fa-play"></i>
+                </button>
+                <button class="timer-btn secondary" id="btn-reset">
+                    <i class="fas fa-redo"></i>
+                </button>
+            </div>
+            
+            <div class="pomodoro-count" id="pomodoro-count">
+                <div class="pomodoro-item completed"></div>
+                <div class="pomodoro-item completed"></div>
+                <div class="pomodoro-item"></div>
+                <div class="pomodoro-item"></div>
+                <div class="pomodoro-item"></div>
+                <div class="pomodoro-item"></div>
+                <div class="pomodoro-item"></div>
+                <div class="pomodoro-item"></div>
+            </div>
+            
+            <div class="task-section">
+                <div class="task-header">
+                    <h2 class="task-title">當前任務</h2>
+                </div>
+                
+                <select class="task-select" id="task-select">
+                    <option value="">-- 選擇任務 --</option>
+                    <option value="task1">完成網頁設計項目</option>
+                    <option value="task2">學習JavaScript基礎</option>
+                </select>
+                
+                <div class="task-info">
+                    <div class="task-pomodoros">
+                        <i class="fas fa-clock"></i>
+                        <span id="task-pomodoros">2/4</span>
+                    </div>
+                    <div class="task-category work">工作</div>
+                </div>
+            </div>
+            
+            <a href="settings.html" class="settings-link">
+                <i class="fas fa-cog"></i> 調整設置
+            </a>
+        </div>
+        
+        <!-- 底部標籤欄 -->
+        <div class="tab-bar">
+            <a href="home.html" class="tab-item active">
+                <i class="fas fa-clock tab-icon"></i>
+                <span>計時器</span>
+            </a>
+            <a href="tasks.html" class="tab-item">
+                <i class="fas fa-tasks tab-icon"></i>
+                <span>任務</span>
+            </a>
+            <a href="stats.html" class="tab-item">
+                <i class="fas fa-chart-bar tab-icon"></i>
+                <span>統計</span>
+            </a>
+            <a href="settings.html" class="tab-item">
+                <i class="fas fa-cog tab-icon"></i>
+                <span>設置</span>
+            </a>
+        </div>
+    </div>
+    
+
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 檢查是否已登入
+            if (!PomodoroApp.isLoggedIn()) {
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            // 檢查並應用深色模式設置
+            const isDarkMode = localStorage.getItem('darkMode') === 'true';
+            if (isDarkMode) {
+                document.body.classList.add('dark-mode');
+                document.getElementById('darkModeToggle').innerHTML = '<i class="fas fa-sun"></i>';
+            } else {
+                document.getElementById('darkModeToggle').innerHTML = '<i class="fas fa-moon"></i>';
+            }
+            
+            // 深色模式切換按鈕點擊事件
+            const darkModeToggle = document.getElementById('darkModeToggle');
+            darkModeToggle.addEventListener('click', function() {
+                document.body.classList.toggle('dark-mode');
+                const isDark = document.body.classList.contains('dark-mode');
+                localStorage.setItem('darkMode', isDark);
+                darkModeToggle.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+            });
+            
+            // 添加使用者資訊和登出按鈕
+            const userContainer = document.getElementById('user-container');
+            const currentUser = PomodoroApp.getCurrentUser();
+            
+            if (currentUser) {
+                const userInfo = document.createElement('div');
+                userInfo.className = 'user-info';
+                
+                // 使用者頭像
+                const userAvatar = document.createElement('div');
+                userAvatar.className = 'user-avatar';
+                userAvatar.style.backgroundColor = currentUser.avatar || '#4285F4';
+                userAvatar.innerHTML = '<i class="fas fa-user"></i>';
+                
+                // 使用者名稱
+                const userName = document.createElement('div');
+                userName.className = 'user-name';
+                userName.textContent = currentUser.name;
+                
+                // 登出按鈕
+                const logoutBtn = document.createElement('button');
+                logoutBtn.className = 'logout-btn ml-2';
+                logoutBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i>';
+                logoutBtn.title = '登出';
+                logoutBtn.addEventListener('click', function() {
+                    if (confirm('確定要登出嗎？')) {
+                        PomodoroApp.logout();
+                    }
+                });
+                
+                userInfo.appendChild(userAvatar);
+                userInfo.appendChild(userName);
+                userInfo.appendChild(logoutBtn);
+                userContainer.appendChild(userInfo);
+            }
+            
+            // 計時器功能
+            const timerDisplay = document.getElementById('timer-time');
+            const timerLabel = document.getElementById('timer-label');
+            const progressRing = document.getElementById('progress-ring');
+            const startBtn = document.getElementById('btn-start');
+            const resetBtn = document.getElementById('btn-reset');
+            const skipBtn = document.getElementById('btn-skip');
+            const focusMode = document.getElementById('mode-focus');
+            const shortBreakMode = document.getElementById('mode-short-break');
+            const longBreakMode = document.getElementById('mode-long-break');
+            const taskSelect = document.getElementById('task-select');
+            const taskPomodoros = document.getElementById('task-pomodoros');
+            const pomodoroCount = document.getElementById('pomodoro-count');
+            
+            // 獲取設置
+            const settings = PomodoroApp.data.timerSettings;
+            
+            // 計時器變數
+            let timer;
+            let isRunning = false;
+            let currentMode = 'focus';
+            let timeLeft = settings.focus;
+            let totalTime = settings.focus;
+            let currentTask = null;
+            
+            // 初始化任務選擇
+            function initTaskSelect() {
+                // 清空選擇框
+                taskSelect.innerHTML = '<option value="">-- 選擇任務 --</option>';
+                
+                // 獲取未完成的任務
+                const tasks = PomodoroApp.getTasks({ completed: false });
+                
+                // 添加任務選項
+                tasks.forEach(task => {
+                    const option = document.createElement('option');
+                    option.value = task.id;
+                    option.textContent = task.name;
+                    taskSelect.appendChild(option);
+                });
+                
+                // 設置當前任務
+                const currentTaskId = PomodoroApp.data.timer.currentTask;
+                if (currentTaskId) {
+                    taskSelect.value = currentTaskId;
+                    updateTaskInfo(currentTaskId);
+                }
+            }
+            
+            // 更新任務信息
+            function updateTaskInfo(taskId) {
+                if (!taskId) {
+                    document.querySelector('.task-info').style.display = 'none';
+                    return;
+                }
+                
+                const task = PomodoroApp.data.tasks.find(t => t.id === taskId);
+                if (task) {
+                    document.querySelector('.task-info').style.display = 'flex';
+                    taskPomodoros.textContent = `${task.completedPomodoros}/${task.pomodoros}`;
+                    
+                    const categoryElement = document.querySelector('.task-category');
+                    categoryElement.textContent = task.category === 'work' ? '工作' : '學習';
+                    categoryElement.className = `task-category ${task.category}`;
+                }
+            }
+            
+            // 初始化番茄鐘計數
+            function initPomodoroCount() {
+                pomodoroCount.innerHTML = '';
+                
+                const goal = PomodoroApp.data.timer.pomodoroGoal;
+                const completed = PomodoroApp.data.timer.completedPomodoros;
+                
+                for (let i = 0; i < goal; i++) {
+                    const item = document.createElement('div');
+                    item.className = i < completed ? 'pomodoro-item completed' : 'pomodoro-item';
+                    pomodoroCount.appendChild(item);
+                }
+            }
+            
+            // 更新計時器顯示
+            function updateTimerDisplay() {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                // 更新進度環
+                const progress = 1 - (timeLeft / totalTime);
+                const circumference = 2 * Math.PI * 140;
+                progressRing.style.strokeDashoffset = circumference * (1 - progress);
+            }
+            
+            // 更新模式
+            function updateMode(mode) {
+                currentMode = mode;
+                
+                // 更新模式按鈕
+                focusMode.classList.toggle('active', mode === 'focus');
+                shortBreakMode.classList.toggle('active', mode === 'shortBreak');
+                longBreakMode.classList.toggle('active', mode === 'longBreak');
+                
+                // 更新計時器時間
+                switch (mode) {
+                    case 'focus':
+                        totalTime = settings.focus;
+                        timeLeft = settings.focus;
+                        timerLabel.textContent = '專注時間';
+                        break;
+                    case 'shortBreak':
+                        totalTime = settings.shortBreak;
+                        timeLeft = settings.shortBreak;
+                        timerLabel.textContent = '短休息';
+                        break;
+                    case 'longBreak':
+                        totalTime = settings.longBreak;
+                        timeLeft = settings.longBreak;
+                        timerLabel.textContent = '長休息';
+                        break;
+                }
+                
+                // 更新顯示
+                updateTimerDisplay();
+                
+                // 更新 PomodoroApp 數據
+                PomodoroApp.data.timer.mode = mode;
+                PomodoroApp.data.timer.duration = totalTime;
+                PomodoroApp.data.timer.remaining = timeLeft;
+                PomodoroApp.saveData('timer');
+            }
+            
+            // 開始計時器
+            function startTimer() {
+                if (isRunning) return;
+                
+                isRunning = true;
+                startBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                
+                timer = setInterval(() => {
+                    timeLeft--;
+                    
+                    if (timeLeft <= 0) {
+                        clearInterval(timer);
+                        isRunning = false;
+                        
+                        // 播放提示音
+                        playAlarmSound();
+                        
+                        // 如果是專注模式結束，增加完成的番茄鐘數量
+                        if (currentMode === 'focus') {
+                            PomodoroApp.data.timer.completedPomodoros++;
+                            
+                            // 觸發番茄鐘完成事件
+                            const event = new CustomEvent('pomodoroCompleted', {
+                                detail: { taskId: currentTask }
+                            });
+                            document.dispatchEvent(event);
+                            
+                            // 更新番茄鐘計數
+                            initPomodoroCount();
+                            
+                            // 如果有選擇任務，更新任務信息
+                            if (currentTask) {
+                                updateTaskInfo(currentTask);
+                            }
+                            
+                            // 檢查是否需要長休息
+                            const longBreakInterval = settings.longBreakInterval;
+                            const completedCount = PomodoroApp.data.timer.completedPomodoros;
+                            
+                            if (completedCount % longBreakInterval === 0) {
+                                updateMode('longBreak');
+                            } else {
+                                updateMode('shortBreak');
+                            }
+                            
+                            // 如果設置了自動開始休息，則自動開始計時器
+                            if (settings.autoStartBreaks) {
+                                startTimer();
+                            }
+                        } else {
+                            // 如果是休息模式結束，切換回專注模式
+                            updateMode('focus');
+                            
+                            // 如果設置了自動開始番茄鐘，則自動開始計時器
+                            if (settings.autoStartPomodoros) {
+                                startTimer();
+                            }
+                        }
+                        
+                        startBtn.innerHTML = '<i class="fas fa-play"></i>';
+                    }
+                    
+                    // 更新顯示
+                    updateTimerDisplay();
+                    
+                    // 更新 PomodoroApp 數據
+                    PomodoroApp.data.timer.remaining = timeLeft;
+                    PomodoroApp.data.timer.isRunning = isRunning;
+                    PomodoroApp.saveData('timer');
+                }, 1000);
+            }
+            
+            // 暫停計時器
+            function pauseTimer() {
+                if (!isRunning) return;
+                
+                clearInterval(timer);
+                isRunning = false;
+                startBtn.innerHTML = '<i class="fas fa-play"></i>';
+                
+                // 更新 PomodoroApp 數據
+                PomodoroApp.data.timer.isRunning = isRunning;
+                PomodoroApp.saveData('timer');
+            }
+            
+            // 重置計時器
+            function resetTimer() {
+                clearInterval(timer);
+                isRunning = false;
+                startBtn.innerHTML = '<i class="fas fa-play"></i>';
+                
+                // 重置時間
+                timeLeft = totalTime;
+                
+                // 更新顯示
+                updateTimerDisplay();
+                
+                // 更新 PomodoroApp 數據
+                PomodoroApp.data.timer.remaining = timeLeft;
+                PomodoroApp.data.timer.isRunning = isRunning;
+                PomodoroApp.saveData('timer');
+            }
+            
+            // 跳過當前階段
+            function skipTimer() {
+                clearInterval(timer);
+                isRunning = false;
+                startBtn.innerHTML = '<i class="fas fa-play"></i>';
+                
+                // 如果是專注模式，切換到休息模式
+                if (currentMode === 'focus') {
+                    // 檢查是否需要長休息
+                    const longBreakInterval = settings.longBreakInterval;
+                    const completedCount = PomodoroApp.data.timer.completedPomodoros;
+                    
+                    if ((completedCount + 1) % longBreakInterval === 0) {
+                        updateMode('longBreak');
+                    } else {
+                        updateMode('shortBreak');
+                    }
+                } else {
+                    // 如果是休息模式，切換回專注模式
+                    updateMode('focus');
+                }
+            }
+            
+            // 播放提示音
+            function playAlarmSound() {
+                const sound = settings.alarmSound;
+                const volume = settings.alarmVolume;
+                
+                if (sound === 'none') return;
+                
+                // 使用 Web Audio API 生成音效
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const gainNode = audioContext.createGain();
+                    gainNode.gain.value = volume;
+                    gainNode.connect(audioContext.destination);
+                    
+                    switch (sound) {
+                        case 'bell':
+                            playBellSound(audioContext, gainNode);
+                            break;
+                        case 'digital':
+                            playDigitalSound(audioContext, gainNode);
+                            break;
+                        case 'zen':
+                            playZenSound(audioContext, gainNode);
+                            break;
+                        default:
+                            playDefaultSound(audioContext, gainNode);
+                    }
+                } catch (err) {
+                    console.error('音效播放失敗:', err);
+                    // 如果 Web Audio API 不可用，使用瀏覽器內建的提示音
+                    alert('計時完成！');
+                }
+            }
+            
+            // 默認音效（簡單的嗶嗶聲）
+            function playDefaultSound(audioContext, gainNode) {
+                const oscillator = audioContext.createOscillator();
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(880, audioContext.currentTime); // A5
+                oscillator.connect(gainNode);
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + 0.5);
+                
+                setTimeout(() => {
+                    const oscillator2 = audioContext.createOscillator();
+                    oscillator2.type = 'sine';
+                    oscillator2.frequency.setValueAtTime(1320, audioContext.currentTime); // E6
+                    oscillator2.connect(gainNode);
+                    oscillator2.start();
+                    oscillator2.stop(audioContext.currentTime + 0.5);
+                }, 600);
+            }
+            
+            // 鈴聲音效
+            function playBellSound(audioContext, gainNode) {
+                const oscillator = audioContext.createOscillator();
+                const dynamicsCompressor = audioContext.createDynamicsCompressor();
+                
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(830, audioContext.currentTime);
+                
+                // 添加衰減效果模擬鈴聲
+                const now = audioContext.currentTime;
+                gainNode.gain.setValueAtTime(0.1, now);
+                gainNode.gain.exponentialRampToValueAtTime(1, now + 0.01);
+                gainNode.gain.exponentialRampToValueAtTime(0.3, now + 0.5);
+                gainNode.gain.exponentialRampToValueAtTime(0.1, now + 1);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 1.5);
+                
+                oscillator.connect(dynamicsCompressor);
+                dynamicsCompressor.connect(gainNode);
+                
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + 1.5);
+            }
+            
+            // 數字音效
+            function playDigitalSound(audioContext, gainNode) {
+                const frequencies = [1046.5, 1318.5, 1568, 2093]; // C6, E6, G6, C7
+                
+                frequencies.forEach((freq, i) => {
+                    setTimeout(() => {
+                        const oscillator = audioContext.createOscillator();
+                        oscillator.type = 'square';
+                        oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+                        oscillator.connect(gainNode);
+                        oscillator.start();
+                        oscillator.stop(audioContext.currentTime + 0.1);
+                    }, i * 150);
+                });
+            }
+            
+            // 禪鐘音效
+            function playZenSound(audioContext, gainNode) {
+                const oscillator = audioContext.createOscillator();
+                
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(220, audioContext.currentTime); // A3
+                
+                // 添加長衰減效果
+                const now = audioContext.currentTime;
+                gainNode.gain.setValueAtTime(0.01, now);
+                gainNode.gain.exponentialRampToValueAtTime(0.8, now + 0.1);
+                gainNode.gain.exponentialRampToValueAtTime(0.6, now + 0.6);
+                gainNode.gain.exponentialRampToValueAtTime(0.4, now + 1.2);
+                gainNode.gain.exponentialRampToValueAtTime(0.2, now + 1.8);
+                gainNode.gain.exponentialRampToValueAtTime(0.1, now + 2.4);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, now + 3.0);
+                
+                oscillator.connect(gainNode);
+                oscillator.start();
+                oscillator.stop(audioContext.currentTime + 3.0);
+            }
+            
+            // 初始化計時器
+            function initTimer() {
+                // 從 PomodoroApp 獲取數據
+                currentMode = PomodoroApp.data.timer.mode;
+                timeLeft = PomodoroApp.data.timer.remaining;
+                totalTime = PomodoroApp.data.timer.duration;
+                isRunning = PomodoroApp.data.timer.isRunning;
+                currentTask = PomodoroApp.data.timer.currentTask;
+                
+                // 更新模式按鈕
+                focusMode.classList.toggle('active', currentMode === 'focus');
+                shortBreakMode.classList.toggle('active', currentMode === 'shortBreak');
+                longBreakMode.classList.toggle('active', currentMode === 'longBreak');
+                
+                // 更新標籤
+                switch (currentMode) {
+                    case 'focus':
+                        timerLabel.textContent = '專注時間';
+                        break;
+                    case 'shortBreak':
+                        timerLabel.textContent = '短休息';
+                        break;
+                    case 'longBreak':
+                        timerLabel.textContent = '長休息';
+                        break;
+                }
+                
+                // 更新顯示
+                updateTimerDisplay();
+                
+                // 如果計時器正在運行，則繼續運行
+                if (isRunning) {
+                    startTimer();
+                }
+            }
+            
+            // 事件監聽器
+            startBtn.addEventListener('click', () => {
+                if (isRunning) {
+                    pauseTimer();
+                } else {
+                    startTimer();
+                }
+            });
+            
+            resetBtn.addEventListener('click', resetTimer);
+            skipBtn.addEventListener('click', skipTimer);
+            
+            focusMode.addEventListener('click', () => updateMode('focus'));
+            shortBreakMode.addEventListener('click', () => updateMode('shortBreak'));
+            longBreakMode.addEventListener('click', () => updateMode('longBreak'));
+            
+            taskSelect.addEventListener('change', function() {
+                const taskId = this.value;
+                currentTask = taskId;
+                
+                // 更新任務信息
+                updateTaskInfo(taskId);
+                
+                // 更新 PomodoroApp 數據
+                PomodoroApp.setCurrentTask(taskId);
+            });
+            
+            // 初始化
+            initTaskSelect();
+            initPomodoroCount();
+            initTimer();
+            
+            // 設置進度環的初始值
+            const circumference = 2 * Math.PI * 140;
+            progressRing.style.strokeDasharray = circumference;
+            progressRing.style.strokeDashoffset = circumference;
+        });
+    </script>
+</body>
+</html> 

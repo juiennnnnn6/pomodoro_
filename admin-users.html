@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>番茄鐘 - 用戶管理</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="app.js"></script>
+    <style>
+        /* 後台特定樣式 */
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .admin-sidebar {
+            width: 250px;
+            background-color: var(--dark-color);
+            color: white;
+            padding: 20px 0;
+            flex-shrink: 0;
+        }
+        
+        .admin-logo {
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            margin-bottom: 30px;
+        }
+        
+        .admin-logo-icon {
+            width: 40px;
+            height: 40px;
+            background-color: var(--primary-color);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-size: 20px;
+        }
+        
+        .admin-logo-text {
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .admin-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .admin-menu-item {
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .admin-menu-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .admin-menu-item.active {
+            background-color: var(--primary-color);
+        }
+        
+        .admin-menu-icon {
+            margin-right: 12px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .admin-content {
+            flex: 1;
+            padding: 20px;
+            background-color: var(--background-color);
+            overflow-y: auto;
+        }
+        
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--gray-3);
+        }
+        
+        .admin-title {
+            font-size: 24px;
+            font-weight: 500;
+        }
+        
+        .admin-user {
+            display: flex;
+            align-items: center;
+        }
+        
+        .admin-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+        }
+        
+        .admin-username {
+            margin-right: 15px;
+        }
+        
+        .admin-logout {
+            color: var(--error-color);
+            cursor: pointer;
+        }
+        
+        .admin-card {
+            background-color: white;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .admin-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .admin-card-title {
+            font-size: 18px;
+            font-weight: 500;
+        }
+        
+        .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .admin-table th,
+        .admin-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--gray-3);
+        }
+        
+        .admin-table th {
+            font-weight: 500;
+            color: var(--gray-1);
+            background-color: var(--gray-5);
+        }
+        
+        .admin-table tr:hover {
+            background-color: var(--gray-5);
+        }
+        
+        .admin-table-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .admin-action-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--gray-5);
+            color: var(--gray-1);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .admin-action-btn:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .admin-action-btn.delete:hover {
+            background-color: var(--error-color);
+        }
+        
+        .admin-pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .admin-pagination-item {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-sm);
+            margin: 0 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .admin-pagination-item:hover {
+            background-color: var(--gray-4);
+        }
+        
+        .admin-pagination-item.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .admin-search {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        
+        .admin-search-input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 1px solid var(--gray-3);
+            border-radius: var(--radius-sm) 0 0 var(--radius-sm);
+            font-size: 14px;
+        }
+        
+        .admin-search-btn {
+            padding: 10px 15px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+            cursor: pointer;
+        }
+        
+        .admin-filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .admin-filter-select {
+            padding: 8px 12px;
+            border: 1px solid var(--gray-3);
+            border-radius: var(--radius-sm);
+            background-color: white;
+            font-size: 14px;
+        }
+        
+        .admin-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .admin-badge.active {
+            background-color: rgba(52, 168, 83, 0.1);
+            color: var(--success-color);
+        }
+        
+        .admin-badge.inactive {
+            background-color: rgba(234, 67, 53, 0.1);
+            color: var(--error-color);
+        }
+        
+        .admin-badge.social {
+            background-color: rgba(66, 133, 244, 0.1);
+            color: var(--primary-color);
+        }
+        
+        /* 深色模式 */
+        body.dark-mode .admin-content {
+            background-color: #121212;
+        }
+        
+        body.dark-mode .admin-card {
+            background-color: #1e1e1e;
+            color: var(--gray-4);
+        }
+        
+        body.dark-mode .admin-table th {
+            background-color: #2a2a2a;
+            color: var(--gray-4);
+        }
+        
+        body.dark-mode .admin-table td {
+            border-bottom-color: #2a2a2a;
+        }
+        
+        body.dark-mode .admin-table tr:hover {
+            background-color: #2a2a2a;
+        }
+        
+        body.dark-mode .admin-action-btn {
+            background-color: #2a2a2a;
+            color: var(--gray-4);
+        }
+        
+        body.dark-mode .admin-search-input,
+        body.dark-mode .admin-filter-select {
+            background-color: #1e1e1e;
+            border-color: #2a2a2a;
+            color: var(--gray-4);
+        }
+        
+        @media (max-width: 768px) {
+            .admin-layout {
+                flex-direction: column;
+            }
+            
+            .admin-sidebar {
+                width: 100%;
+                padding: 10px 0;
+            }
+            
+            .admin-menu-item {
+                padding: 10px 15px;
+            }
+            
+            .admin-content {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- 側邊欄 -->
+        <div class="admin-sidebar">
+            <div class="admin-logo">
+                <div class="admin-logo-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="admin-logo-text">番茄鐘管理後台</div>
+            </div>
+            
+            <ul class="admin-menu">
+                <li class="admin-menu-item" data-page="dashboard">
+                    <span class="admin-menu-icon"><i class="fas fa-tachometer-alt"></i></span>
+                    <span>儀表板</span>
+                </li>
+                <li class="admin-menu-item active" data-page="users">
+                    <span class="admin-menu-icon"><i class="fas fa-users"></i></span>
+                    <span>用戶管理</span>
+                </li>
+                <li class="admin-menu-item" data-page="tasks">
+                    <span class="admin-menu-icon"><i class="fas fa-tasks"></i></span>
+                    <span>任務管理</span>
+                </li>
+                <li class="admin-menu-item" data-page="stats">
+                    <span class="admin-menu-icon"><i class="fas fa-chart-bar"></i></span>
+                    <span>統計分析</span>
+                </li>
+                <li class="admin-menu-item" data-page="settings">
+                    <span class="admin-menu-icon"><i class="fas fa-cog"></i></span>
+                    <span>系統設置</span>
+                </li>
+                <li class="admin-menu-item" data-page="logs">
+                    <span class="admin-menu-icon"><i class="fas fa-history"></i></span>
+                    <span>系統日誌</span>
+                </li>
+            </ul>
+        </div>
+        
+        <!-- 主要內容 -->
+        <div class="admin-content">
+            <div class="admin-header">
+                <h1 class="admin-title">用戶管理</h1>
+                <div class="admin-user">
+                    <div class="admin-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <span class="admin-username">管理員</span>
+                    <span class="admin-logout"><i class="fas fa-sign-out-alt"></i> 登出</span>
+                </div>
+            </div>
+            
+            <!-- 搜索和篩選 -->
+            <div class="admin-search">
+                <input type="text" class="admin-search-input" placeholder="搜索用戶名、電子郵件或 ID...">
+                <button class="admin-search-btn"><i class="fas fa-search"></i></button>
+            </div>
+            
+            <div class="admin-filters">
+                <select class="admin-filter-select">
+                    <option value="">所有狀態</option>
+                    <option value="active">活躍</option>
+                    <option value="inactive">非活躍</option>
+                </select>
+                
+                <select class="admin-filter-select">
+                    <option value="">所有註冊類型</option>
+                    <option value="email">電子郵件</option>
+                    <option value="google">Google</option>
+                    <option value="facebook">Facebook</option>
+                    <option value="apple">Apple</option>
+                </select>
+                
+                <select class="admin-filter-select">
+                    <option value="">註冊日期</option>
+                    <option value="today">今天</option>
+                    <option value="week">本週</option>
+                    <option value="month">本月</option>
+                    <option value="year">今年</option>
+                </select>
+            </div>
+            
+            <!-- 用戶列表 -->
+            <div class="admin-card">
+                <div class="admin-card-header">
+                    <h2 class="admin-card-title">用戶列表</h2>
+                    <button class="btn btn-primary"><i class="fas fa-plus"></i> 新增用戶</button>
+                </div>
+                
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>名稱</th>
+                            <th>電子郵件</th>
+                            <th>註冊類型</th>
+                            <th>註冊時間</th>
+                            <th>狀態</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>user_1234</td>
+                            <td>張小明</td>
+                            <td>zhang@example.com</td>
+                            <td><span class="admin-badge social">Google</span></td>
+                            <td>2023-05-15 14:30</td>
+                            <td><span class="admin-badge active">活躍</span></td>
+                            <td>
+                                <div class="admin-table-actions">
+                                    <div class="admin-action-btn">
+                                        <i class="fas fa-eye"></i>
+                                    </div>
+                                    <div class="admin-action-btn">
+                                        <i class="fas fa-edit"></i>
+                                    </div>
+                                    <div class="admin-action-btn delete">
+                                        <i class="fas fa-trash"></i>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>user_1235</td>
+                            <td>李小華</td>
+                            <td>li@example.com</td>
+                            <td><span class="admin-badge">電子郵件</span></td>
+                            <td>2023-05-14 09:45</td>
+                            <td><span class="admin-badge active">活躍</span></td>
+                            <td>
+                                <div class="admin-table-actions">
+                                    <div class="admin-action-btn">
+                                        <i class="fas fa-eye"></i>
+                                    </div>
+                                    <div class="admin-action-btn">
+                                        <i class="fas fa-edit"></i>
+                                    </div>
+                                    <div class="admin-action-btn delete">
+                                        <i class="fas fa-trash"></i>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>user_1236</td>
+                            <td>王大力</td>
+                            <td>wang@example.com</td>
+                            <td><span class="admin-badge social">Facebook</span></td>
+                            <td>2023-05-13 16:20</td>
+                            <td><span class="admin-badge active">活躍</span></td>
+                            <td>
+                                <div class="admin-table-actions">
+                                    <div class="admin-action-btn">
+                                        <i class="fas fa-eye"></i>
+                                    </div>
+                                    <div class="admin-action-btn">
+                                        <i class="fas fa-edit"></i>
+                                    </div>
+                                    <div class="admin-action-btn delete">
+                                        <i class="fas fa-trash"></i>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>user_1237</td>
+                            <td>陳小芳</td>
+                            <td>chen@example.com</td>
+                            <td><span class="admin-badge">電子郵件</span></td>
+                            <td>2023-05-12 11:10</td>
+                            <td><span class="admin-badge inactive">非活躍</span></td>
+                            <td>
+                                <div class="admin-table-actions">
+                                    <div class="admin-action-btn">
+                                        <i class="fas fa-eye"></i>
+                                    </div>
+                                    <div class="admin-action-btn">
+                                        <i class="fas fa-edit"></i>
+                                    </div>
+                                    <div class="admin-action-btn delete">
+                                        <i class="fas fa-trash"></i>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>user_1238</td>
+                            <td>林小雨</td>
+                            <td>lin@example.com</td>
+                            <td><span class="admin-badge social">Apple</span></td>
+                            <td>2023-05-11 08:55</td>
+                            <td><span class="admin-badge inactive">非活躍</span></td>
+                            <td>
+                                <div class="admin-table-actions">
+                                    <div class="admin-action-btn">
+                                        <i class="fas fa-eye"></i>
+                                    </div>
+                                    <div class="admin-action-btn">
+                                        <i class="fas fa-edit"></i>
+                                    </div>
+                                    <div class="admin-action-btn delete">
+                                        <i class="fas fa-trash"></i>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>user_1239</td>
+                            <td>趙明明</td>
+                            <td>zhao@example.com</td>
+                            <td><span class="admin-badge">電子郵件</span></td>
+                            <td>2023-05-10 14:22</td>
+                            <td><span class="admin-badge active">活躍</span></td>
+                            <td>
+                                <div class="admin-table-actions">
+                                    <div class="admin-action-btn">
+                                        <i class="fas fa-eye"></i>
+                                    </div>
+                                    <div class="admin-action-btn">
+                                        <i class="fas fa-edit"></i>
+                                    </div>
+                                    <div class="admin-action-btn delete">
+                                        <i class="fas fa-trash"></i>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>user_1240</td>
+                            <td>劉小軍</td>
+                            <td>liu@example.com</td>
+                            <td><span class="admin-badge social">Google</span></td>
+                            <td>2023-05-09 09:15</td>
+                            <td><span class="admin-badge active">活躍</span></td>
+                            <td>
+                                <div class="admin-table-actions">
+                                    <div class="admin-action-btn">
+                                        <i class="fas fa-eye"></i>
+                                    </div>
+                                    <div class="admin-action-btn">
+                                        <i class="fas fa-edit"></i>
+                                    </div>
+                                    <div class="admin-action-btn delete">
+                                        <i class="fas fa-trash"></i>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>user_1241</td>
+                            <td>楊小花</td>
+                            <td>yang@example.com</td>
+                            <td><span class="admin-badge">電子郵件</span></td>
+                            <td>2023-05-08 16:40</td>
+                            <td><span class="admin-badge inactive">非活躍</span></td>
+                            <td>
+                                <div class="admin-table-actions">
+                                    <div class="admin-action-btn">
+                                        <i class="fas fa-eye"></i>
+                                    </div>
+                                    <div class="admin-action-btn">
+                                        <i class="fas fa-edit"></i>
+                                    </div>
+                                    <div class="admin-action-btn delete">
+                                        <i class="fas fa-trash"></i>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="admin-pagination">
+                    <div class="admin-pagination-item">
+                        <i class="fas fa-chevron-left"></i>
+                    </div>
+                    <div class="admin-pagination-item active">1</div>
+                    <div class="admin-pagination-item">2</div>
+                    <div class="admin-pagination-item">3</div>
+                    <div class="admin-pagination-item">4</div>
+                    <div class="admin-pagination-item">5</div>
+                    <div class="admin-pagination-item">
+                        <i class="fas fa-chevron-right"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 檢查是否是管理員
+            const isAdmin = checkAdminStatus();
+            if (!isAdmin) {
+                window.location.href = 'admin-login.html';
+                return;
+            }
+            
+            // 檢查並應用深色模式設置
+            const isDarkMode = localStorage.getItem('darkMode') === 'true';
+            if (isDarkMode) {
+                document.body.classList.add('dark-mode');
+            }
+            
+            // 側邊欄菜單點擊事件
+            const menuItems = document.querySelectorAll('.admin-menu-item');
+            menuItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const page = this.getAttribute('data-page');
+                    
+                    // 跳轉到主管理頁面並通過參數指定要顯示的內容
+                    window.location.href = `admin.html?page=${page}`;
+                });
+            });
+            
+            // 登出按鈕點擊事件
+            const logoutBtn = document.querySelector('.admin-logout');
+            logoutBtn.addEventListener('click', function() {
+                if (confirm('確定要登出管理後台嗎？')) {
+                    // 清除管理員狀態
+                    localStorage.removeItem('adminLoggedIn');
+                    window.location.href = 'admin-login.html';
+                }
+            });
+            
+            // 搜索按鈕點擊事件
+            const searchBtn = document.querySelector('.admin-search-btn');
+            searchBtn.addEventListener('click', function() {
+                const searchInput = document.querySelector('.admin-search-input');
+                const searchValue = searchInput.value.trim();
+                
+                if (searchValue) {
+                    // 在實際應用中，這裡應該調用 API 進行搜索
+                    console.log('搜索用戶:', searchValue);
+                    alert('搜索功能尚未實現');
+                }
+            });
+            
+            // 篩選下拉框變更事件
+            const filterSelects = document.querySelectorAll('.admin-filter-select');
+            filterSelects.forEach(select => {
+                select.addEventListener('change', function() {
+                    // 在實際應用中，這裡應該調用 API 進行篩選
+                    console.log('篩選條件變更:', this.value);
+                    alert('篩選功能尚未實現');
+                });
+            });
+            
+            // 操作按鈕點擊事件
+            const actionBtns = document.querySelectorAll('.admin-action-btn');
+            actionBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const action = this.classList.contains('delete') ? 'delete' : 
+                                  this.querySelector('i').classList.contains('fa-eye') ? 'view' : 'edit';
+                    
+                    const row = this.closest('tr');
+                    const userId = row.cells[0].textContent;
+                    const userName = row.cells[1].textContent;
+                    
+                    switch(action) {
+                        case 'view':
+                            alert(`查看用戶詳情: ${userName} (${userId})`);
+                            break;
+                        case 'edit':
+                            alert(`編輯用戶: ${userName} (${userId})`);
+                            break;
+                        case 'delete':
+                            if (confirm(`確定要刪除用戶 ${userName} (${userId}) 嗎？`)) {
+                                alert(`用戶刪除功能尚未實現`);
+                            }
+                            break;
+                    }
+                });
+            });
+            
+            // 分頁按鈕點擊事件
+            const paginationItems = document.querySelectorAll('.admin-pagination-item');
+            paginationItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    if (!this.classList.contains('active') && !this.querySelector('i')) {
+                        paginationItems.forEach(i => i.classList.remove('active'));
+                        this.classList.add('active');
+                        
+                        // 在實際應用中，這裡應該調用 API 獲取對應頁碼的數據
+                        alert(`切換到第 ${this.textContent} 頁`);
+                    } else if (this.querySelector('i.fa-chevron-left')) {
+                        // 上一頁
+                        alert('上一頁功能尚未實現');
+                    } else if (this.querySelector('i.fa-chevron-right')) {
+                        // 下一頁
+                        alert('下一頁功能尚未實現');
+                    }
+                });
+            });
+            
+            // 新增用戶按鈕點擊事件
+            const addUserBtn = document.querySelector('.btn-primary');
+            addUserBtn.addEventListener('click', function() {
+                alert('新增用戶功能尚未實現');
+            });
+            
+            // 檢查管理員狀態
+            function checkAdminStatus() {
+                // 這裡應該有更嚴格的驗證，例如檢查 JWT 令牌
+                return localStorage.getItem('adminLoggedIn') === 'true';
+            }
+        });
+    </script>
+</body>
+</html> 
